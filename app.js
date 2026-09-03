@@ -1,7 +1,6 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
-import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import addressRoutes from "./routes/addressRoutes.js";
 import attributeRoutes from "./routes/attributeRoutes.js";
@@ -12,6 +11,7 @@ import inventoryRoutes from "./routes/inventoryRoutes.js";
 import productImageRoutes from "./routes/productImageRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import productVariantRoutes from "./routes/productVariantRoutes.js";
+import { generalLimiter, } from "./utils/rateLimiter.js";
 import { MESSAGES, STATUS_CODES } from "./utils/setConstants.js";
 
 const app = express();
@@ -35,18 +35,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Rate limiter
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: {
-        success: false,
-        message: MESSAGES.TOO_MANY_REQUESTS,
-    },
-});
-
-app.use("/api", limiter);
+app.use("/api", generalLimiter);
 
 // Health check
 app.get("/api/health", (req, res) => {

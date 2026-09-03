@@ -61,5 +61,6 @@ export const MESSAGES = {
     PRODUCT_IMAGE_DELETED:"Product Image deleted successfully",
     PRODUCT_VARIANT_CREATED:"Product variant created successfully",
     PRODUCT_VARIANTS_FETCHED:"Product variants fetched successfully",
-    PRODUCT_VARIANT_UPDATED:"Product variant updated successfully"
+    PRODUCT_VARIANT_UPDATED:"Product variant updated successfully",
+    PRODUCT_VARIANT_DELETED:"Product variant deleted successfully"
 };
