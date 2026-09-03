@@ -11,7 +11,6 @@ export const login = async (req, res) => {
         const result = await loginWithPhone(
             req.body.phone
         );
-
         return res.status(STATUS_CODES.OK).json({
             success: true,
             message: MESSAGES.OTP_SENT,
@@ -25,14 +24,12 @@ export const login = async (req, res) => {
     }
 };
 
-
 export const verifyOtp = async (req, res) => {
     try {
         const result = await verifyLoginOtp(
             req.body.phone,
             req.body.otp
         );
-
         return res.status(STATUS_CODES.OK).json({
             success: true,
             message: MESSAGES.LOGIN_SUCCESSFUL,
@@ -52,7 +49,6 @@ export const sellerLogin = async (req, res) => {
         const result = await loginSellerWithPhone(
             req.body.phone
         );
-
         return res.status(STATUS_CODES.OK).json({
             success: true,
             message: MESSAGES.SELLER_OTP_SENT,
@@ -72,7 +68,6 @@ export const sellerVerifyOtp = async (req, res) => {
             req.body.phone,
             req.body.otp
         );
-
         return res.status(STATUS_CODES.OK).json({
             success: true,
             message: MESSAGES.SELLER_LOGIN_SUCCESSFUL,

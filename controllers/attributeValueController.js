@@ -5,7 +5,6 @@ import {
     getAttributeValues,
     updateAttributeValue,
 } from "../services/attributeValueService.js";
-
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 export const create = async (req, res) => {
@@ -14,7 +13,6 @@ export const create = async (req, res) => {
             req.params.attributeId,
             req.body
         );
-
         return res.status(STATUS_CODES.CREATED).json({
             success: true,
             message: MESSAGES.ATTRIBUTE_VALUE_CREATED,
@@ -33,7 +31,6 @@ export const getAll = async (req, res) => {
         const values = await getAttributeValues(
             req.params.attributeId
         );
-
         return res.status(STATUS_CODES.OK).json({
             success: true,
             message: MESSAGES.ATTRIBUTE_VALUE_FETCHED,
@@ -53,7 +50,6 @@ export const getById = async (req, res) => {
             req.params.attributeId,
             req.params.valueId
         );
-
         return res.status(STATUS_CODES.OK).json({
             success: true,
             message: MESSAGES.ATTRIBUTE_VALUE_FETCHED,
@@ -74,7 +70,6 @@ export const update = async (req, res) => {
             req.params.valueId,
             req.body
         );
-
         return res.status(STATUS_CODES.OK).json({
             success: true,
             message: MESSAGES.ATTRIBUTE_VALUE_UPDATED,
@@ -94,7 +89,6 @@ export const remove = async (req, res) => {
             req.params.attributeId,
             req.params.valueId
         );
-
         return res.status(STATUS_CODES.OK).json({
             success: true,
             message: MESSAGES.ATTRIBUTE_VALUE_DELETED ,

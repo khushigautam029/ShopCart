@@ -5,13 +5,11 @@ import {
     getAttributeById,
     updateAttribute,
 } from "../services/attributeService.js";
-
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 export const create = async (req, res) => {
     try {
         const attribute = await createAttribute(req.body);
-
         return res.status(STATUS_CODES.CREATED).json({
             success: true,
             message: MESSAGES.ATTRIBUTE_CREATED,
@@ -28,7 +26,6 @@ export const create = async (req, res) => {
 export const getAll = async (req, res) => {
     try {
         const attributes = await getAllAttributes();
-
         return res.status(STATUS_CODES.OK).json({
             success: true,
             message: MESSAGES.ATTRIBUTE_FETCHED,
@@ -49,7 +46,6 @@ export const getById = async (req, res) => {
         const attribute = await getAttributeById(
             req.params.id
         );
-
         return res.status(STATUS_CODES.OK).json({
             success: true,
             message: MESSAGES.ATTRIBUTE_FETCHED,
@@ -69,7 +65,6 @@ export const update = async (req, res) => {
             req.params.id,
             req.body
         );
-
         return res.status(STATUS_CODES.OK).json({
             success: true,
             message: MESSAGES.ATTRIBUTE_UPDATED,
@@ -86,7 +81,6 @@ export const update = async (req, res) => {
 export const remove = async (req, res) => {
     try {
         await deleteAttribute(req.params.id);
-
         return res.status(STATUS_CODES.OK).json({
             success: true,
             message: MESSAGES.ATTRIBUTE_DELETED,
