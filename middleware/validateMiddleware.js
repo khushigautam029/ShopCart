@@ -6,7 +6,6 @@ const validate = (schema) => {
             abortEarly: false,
             stripUnknown: true,
         });
-
         if (error) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
@@ -17,9 +16,7 @@ const validate = (schema) => {
                 })),
             });
         }
-
         req.body = value;
-
         next();
     };
 };

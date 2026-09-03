@@ -14,7 +14,6 @@ export const getAllInventory = asyncHandler(
         const inventory = await getInventory(
             req.user.id
         );
-
         return res.status(STATUS_CODES.OK).json({
             success: true,
             message: MESSAGES.INVENTORY_FETCHED,
@@ -30,7 +29,6 @@ export const getInventoryForVariant = asyncHandler(
                 req.params.variantId,
                 req.user.id
             );
-
         return res.status(STATUS_CODES.OK).json({
             success: true,
             message: MESSAGES.INVENTORY_FETCHED,
@@ -47,7 +45,6 @@ export const updateInventoryStock = asyncHandler(
                 req.user.id,
                 req.body
             );
-
         return res.status(STATUS_CODES.OK).json({
             success: true,
             message: MESSAGES.INVENTORY_UPDATED,

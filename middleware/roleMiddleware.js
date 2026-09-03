@@ -8,14 +8,12 @@ const authorizeRoles = (...roles) => {
                 message: MESSAGES.AUTHENTICATION_REQUIRED,
             });
         }
-
         if (!roles.includes(req.user.role)) {
             return res.status(STATUS_CODES.FORBIDDEN).json({
                 success: false,
                 message: MESSAGES.ACCESS_DENIED,
             });
         }
-
         next();
     };
 };

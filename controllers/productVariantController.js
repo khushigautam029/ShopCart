@@ -5,7 +5,6 @@ import {
     getProductVariants,
     updateProductVariant,
 } from "../services/productVariantService.js";
-
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 export const create = async (req, res) => {
@@ -16,7 +15,6 @@ export const create = async (req, res) => {
                 req.user.id,
                 req.body
             );
-
         return res.status(
             STATUS_CODES.CREATED
         ).json({
@@ -40,7 +38,6 @@ export const getAll = async (req, res) => {
             await getProductVariants(
                 req.params.productId
             );
-
         return res.status(
             STATUS_CODES.OK
         ).json({
@@ -65,7 +62,6 @@ export const getById = async (req, res) => {
                 req.params.productId,
                 req.params.variantId
             );
-
         return res.status(
             STATUS_CODES.OK
         ).json({
@@ -92,7 +88,6 @@ export const update = async (req, res) => {
                 req.user.id,
                 req.body
             );
-
         return res.status(
             STATUS_CODES.OK
         ).json({
@@ -117,7 +112,6 @@ export const remove = async (req, res) => {
             req.params.variantId,
             req.user.id
         );
-
         return res.status(
             STATUS_CODES.OK
         ).json({

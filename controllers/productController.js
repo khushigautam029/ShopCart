@@ -7,7 +7,6 @@ import {
 } from "../services/productService.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
-
 export const create = async(req, res)=>{
     try{
         const product = await createProduct(
