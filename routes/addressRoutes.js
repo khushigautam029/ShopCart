@@ -12,7 +12,6 @@ import {
     setDefaultCustomerAddress,
     updateCustomerAddress,
 } from "../controllers/addressController.js";
-
 import {
     createAddressSchema,
     updateAddressSchema,
@@ -22,37 +21,11 @@ const router = express.Router();
 
 router.use(protect);
 router.use(authorizeRoles("CUSTOMER"));
-
-router.post(
-    "/",
-    validate(createAddressSchema),
-    createCustomerAddress
-);
-
-router.get(
-    "/",
-    getCustomerAddresses
-);
-
-router.get(
-    "/:id",
-    getCustomerAddress
-);
-
-router.put(
-    "/:id",
-    validate(updateAddressSchema),
-    updateCustomerAddress
-);
-
-router.delete(
-    "/:id",
-    deleteCustomerAddress
-);
-
-router.patch(
-    "/:id/default",
-    setDefaultCustomerAddress
-);
+router.post( "/", validate(createAddressSchema), createCustomerAddress);
+router.get( "/", getCustomerAddresses);
+router.get( "/:id", getCustomerAddress);
+router.put( "/:id", validate(updateAddressSchema), updateCustomerAddress);
+router.delete( "/:id", deleteCustomerAddress);
+router.patch("/:id/default", setDefaultCustomerAddress);
 
 export default router;
