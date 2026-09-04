@@ -9,6 +9,7 @@ import authRoutes from "./routes/authRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import inventoryRoutes from "./routes/inventoryRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
 import productImageRoutes from "./routes/productImageRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import productVariantRoutes from "./routes/productVariantRoutes.js";
@@ -58,6 +59,7 @@ app.use( "/api/product-variants", productVariantRoutes);
 app.use("/api/inventory",inventoryRoutes);
 app.use("/api/addresses",addressRoutes);
 app.use("/api/cart",cartRoutes);
+app.use("/api/orders", orderRoutes);
 
 //Global error handler
 app.use(errorHandler);
