@@ -7,10 +7,7 @@ import {
     updateAddress,
 } from "../services/addressService.js";
 import asyncHandler from "../utils/asyncHandler.js";
-import {
-    MESSAGES,
-    STATUS_CODES,
-} from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 export const createCustomerAddress = asyncHandler(async (req, res) => {
         const address = await createAddress(
