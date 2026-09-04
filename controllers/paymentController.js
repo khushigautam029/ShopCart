@@ -2,7 +2,7 @@ import {
     getPaymentById,
     getPaymentsByUser,
 } from "../services/paymentService.js";
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 export const getMyPayments = async (req, res) => {
     try {
@@ -10,7 +10,7 @@ export const getMyPayments = async (req, res) => {
 
         return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Payments fetched successfully",
+            message: MESSAGES.PAYMENT_FETCHED,
             data: payments,
         });
     } catch (error) {
@@ -30,7 +30,7 @@ export const getMyPaymentById = async (req, res) => {
 
         return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Payment fetched successfully",
+            message: MESSAGES.PAYMENT_FETCHED,
             data: payment,
         });
     } catch (error) {

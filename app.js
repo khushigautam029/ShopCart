@@ -8,6 +8,7 @@ import attributeValueRoutes from "./routes/attributeValueRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
+import checkoutRoutes from "./routes/checkoutRoutes.js";
 import inventoryRoutes from "./routes/inventoryRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import paymentMethodRoutes from "./routes/paymentMethodRoutes.js";
@@ -64,6 +65,7 @@ app.use("/api/cart",cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/payment-method",paymentMethodRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/checkout", checkoutRoutes);
 
 //Global error handler
 app.use(errorHandler);

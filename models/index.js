@@ -220,6 +220,18 @@ Payment.belongsTo(Order, {
     as: "order",
 });
 
+PaymentMethod.hasMany(Payment, {
+    foreignKey: "paymentMethodId",
+    as: "payments",
+});
+
+Payment.belongsTo(PaymentMethod, {
+    foreignKey: "paymentMethodId",
+    as: "paymentMethod",
+});
+
+
+
 export {
     Address, Attribute,
     AttributeValue, Cart, CartItem, Category, Inventory, Order, OrderItem, OtpVerification, Payment, PaymentMethod, Product,

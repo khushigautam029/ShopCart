@@ -4,6 +4,7 @@ import {
     getPaymentMethods,
     setDefaultPaymentMethod,
 } from "../services/paymentMethodService.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 export const createPaymentMethod = async (req, res) => {
     try {
@@ -12,13 +13,13 @@ export const createPaymentMethod = async (req, res) => {
             req.body
         );
 
-        return res.status(201).json({
+        return res.status(STATUS_CODES.CREATED).json({
             success: true,
-            message: "Payment method added successfully",
+            message: MESSAGES.PAYMENT_METHOD_ADDED,
             data: paymentMethod,
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: error.message,
         });
@@ -31,13 +32,13 @@ export const getMyPaymentMethods = async (req, res) => {
             req.user.id
         );
 
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Payment methods fetched successfully",
+            message: MESSAGES.PAYMENT_METHOD_FETCHED,
             data: paymentMethods,
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: error.message,
         });
@@ -51,12 +52,12 @@ export const removePaymentMethod = async (req, res) => {
             req.params.id
         );
 
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Payment method deleted successfully",
+            message: MESSAGES.PAYMENT_METHOD_DELETED,
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: error.message,
         });
@@ -70,13 +71,13 @@ export const makeDefaultPaymentMethod = async (req, res) => {
             req.params.id
         );
 
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Default payment method updated successfully",
+            message: MESSAGES.DEFAULT_PAYMENT_METHOD_UPDATED,
             data: paymentMethod,
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: error.message,
         });
