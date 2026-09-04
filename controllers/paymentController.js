@@ -2,22 +2,24 @@ import {
     getPaymentById,
     getPaymentsByUser,
 } from "../services/paymentService.js";
+import { sendError, sendSuccess } from "../utils/responseHandler.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 export const getMyPayments = async (req, res) => {
     try {
         const payments = await getPaymentsByUser(req.user.id);
-
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.PAYMENT_FETCHED,
-            data: payments,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.PAYMENT_FETCHED,
+            { data: payments }
+        );
     } catch (error) {
-        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message: error.message,
-        });
+        return sendError(
+            res,
+            STATUS_CODES.INTERNAL_SERVER_ERROR,
+            error.message
+        );
     }
 };
 
@@ -28,15 +30,17 @@ export const getMyPaymentById = async (req, res) => {
             req.params.id
         );
 
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.PAYMENT_FETCHED,
-            data: payment,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.PAYMENT_FETCHED,
+            { data: payment }
+        );
     } catch (error) {
-        return res.status(STATUS_CODES.NOT_FOUND).json({
-            success: false,
-            message: error.message,
-        });
+        return sendError(
+            res,
+            STATUS_CODES.NOT_FOUND,
+            error.message
+        );
     }
 };

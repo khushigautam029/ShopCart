@@ -2,6 +2,7 @@ import {
     createOrder,
 } from "../services/orderService.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import { sendSuccess } from "../utils/responseHandler.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 export const placeOrder = asyncHandler(
@@ -15,10 +16,11 @@ export const placeOrder = asyncHandler(
             addressId,
             paymentMethod
         );
-        res.status(STATUS_CODES.CREATED).json({
-            success: true,
-            message: MESSAGES.ORDER_PLACED,
-            data: order,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.CREATED,
+            MESSAGES.ORDER_PLACED,
+            { data: order }
+        );
     }
 );

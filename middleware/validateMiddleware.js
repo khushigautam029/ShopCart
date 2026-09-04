@@ -1,3 +1,4 @@
+import { sendError } from "../utils/responseHandler.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 const validate = (schema) => {
@@ -7,14 +8,15 @@ const validate = (schema) => {
             stripUnknown: true,
         });
         if (error) {
-            return res.status(STATUS_CODES.BAD_REQUEST).json({
-                success: false,
-                message: MESSAGES.VALIDATION_FAILED,
-                errors: error.details.map((detail) => ({
+            return sendError(
+                res,
+                STATUS_CODES.BAD_REQUEST,
+                MESSAGES.VALIDATION_FAILED,
+                error.details.map((detail) => ({
                     field: detail.path.join("."),
                     message: detail.message,
-                })),
-            });
+                }))
+            );
         }
         req.body = value;
         next();

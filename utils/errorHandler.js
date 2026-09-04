@@ -1,11 +1,14 @@
+import { sendError } from "./responseHandler.js";
+
 const errorHandler = (err, req, res, next) => {
     const statusCode = err.statusCode || 500;
 
-    res.status(statusCode).json({
-        success: false,
-        message: err.message || "Internal Server Error",
-        errors: err.errors || [],
-    });
+    return sendError(
+        res,
+        statusCode,
+        err.message || "Internal Server Error",
+        err.errors || null
+    );
 };
 
 export default errorHandler;
