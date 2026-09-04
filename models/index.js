@@ -8,6 +8,7 @@ import Inventory from "./Inventory.js";
 import Order from "./Order.js";
 import OrderItem from "./OrderItem.js";
 import OtpVerification from "./OtpVerification.js";
+import Payment from "./Payment.js";
 import PaymentMethod from "./PaymentMethod.js";
 import Product from "./Product.js";
 import ProductImage from "./ProductImage.js";
@@ -199,9 +200,29 @@ PaymentMethod.belongsTo(User, {
     as: "user",
 });
 
+User.hasMany(Payment, {
+    foreignKey: "userId",
+    as: "payments",
+});
+
+Payment.belongsTo(User, {
+    foreignKey: "userId",
+    as: "user",
+});
+
+Order.hasMany(Payment, {
+    foreignKey: "orderId",
+    as: "payments",
+});
+
+Payment.belongsTo(Order, {
+    foreignKey: "orderId",
+    as: "order",
+});
+
 export {
     Address, Attribute,
-    AttributeValue, Cart, CartItem, Category, Inventory, Order, OrderItem, OtpVerification, PaymentMethod, Product,
+    AttributeValue, Cart, CartItem, Category, Inventory, Order, OrderItem, OtpVerification, Payment, PaymentMethod, Product,
     ProductImage, ProductVariant, SellerProfile, User, VariantAttribute
 };
 
