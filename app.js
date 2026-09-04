@@ -6,11 +6,13 @@ import addressRoutes from "./routes/addressRoutes.js";
 import attributeRoutes from "./routes/attributeRoutes.js";
 import attributeValueRoutes from "./routes/attributeValueRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import cartRoutes from "./routes/cartRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import inventoryRoutes from "./routes/inventoryRoutes.js";
 import productImageRoutes from "./routes/productImageRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import productVariantRoutes from "./routes/productVariantRoutes.js";
+import errorHandler from "./utils/errorHandler.js";
 import { generalLimiter, } from "./utils/rateLimiter.js";
 import { MESSAGES, STATUS_CODES } from "./utils/setConstants.js";
 
@@ -55,5 +57,9 @@ app.use( "/api/attribute-values", attributeValueRoutes);
 app.use( "/api/product-variants", productVariantRoutes);
 app.use("/api/inventory",inventoryRoutes);
 app.use("/api/addresses",addressRoutes);
+app.use("/api/cart",cartRoutes);
+
+//Global error handler
+app.use(errorHandler);
 
 export default app;

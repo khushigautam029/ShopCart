@@ -1,8 +1,12 @@
 import Address from "./Address.js";
 import Attribute from "./Attribute.js";
 import AttributeValue from "./AttributeValue.js";
+import Cart from "./Cart.js";
+import CartItem from "./CartItem.js";
 import Category from "./Category.js";
 import Inventory from "./Inventory.js";
+import Order from "./Order.js";
+import OrderItem from "./OrderItem.js";
 import OtpVerification from "./OtpVerification.js";
 import Product from "./Product.js";
 import ProductImage from "./ProductImage.js";
@@ -111,9 +115,82 @@ Address.belongsTo(User, {
     as: "user",
 });
 
+User.hasOne(Cart, {
+    foreignKey: "userId",
+    as: "cart",
+});
+
+Cart.belongsTo(User, {
+    foreignKey: "userId",
+    as: "user",
+});
+
+Cart.hasMany(CartItem, {
+    foreignKey: "cartId",
+    as: "items",
+});
+
+CartItem.belongsTo(Cart, {
+    foreignKey: "cartId",
+    as: "cart",
+});
+
+ProductVariant.hasMany(CartItem, {
+    foreignKey: "variantId",
+    as: "cartItems",
+});
+
+CartItem.belongsTo(ProductVariant, {
+    foreignKey: "variantId",
+    as: "variant",
+});
+
+User.hasMany(Order, {
+    foreignKey: "userId",
+    as: "orders",
+});
+
+Order.belongsTo(User, {
+    foreignKey: "userId",
+    as: "user",
+});
+
+
+Address.hasMany(Order, {
+    foreignKey: "addressId",
+    as: "orders",
+});
+
+Order.belongsTo(Address, {
+    foreignKey: "addressId",
+    as: "address",
+});
+
+
+Order.hasMany(OrderItem, {
+    foreignKey: "orderId",
+    as: "items",
+});
+
+OrderItem.belongsTo(Order, {
+    foreignKey: "orderId",
+    as: "order",
+});
+
+
+ProductVariant.hasMany(OrderItem, {
+    foreignKey: "variantId",
+    as: "orderItems",
+});
+
+OrderItem.belongsTo(ProductVariant, {
+    foreignKey: "variantId",
+    as: "variant",
+});
+
 export {
     Address, Attribute,
-    AttributeValue, Category, Inventory, OtpVerification, Product,
+    AttributeValue, Cart, CartItem, Category, Inventory, Order, OrderItem, OtpVerification, Product,
     ProductImage, ProductVariant, SellerProfile, User, VariantAttribute
 };
 
