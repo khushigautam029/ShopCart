@@ -62,5 +62,11 @@ export const MESSAGES = {
     PRODUCT_VARIANT_CREATED:"Product variant created successfully",
     PRODUCT_VARIANTS_FETCHED:"Product variants fetched successfully",
     PRODUCT_VARIANT_UPDATED:"Product variant updated successfully",
-    PRODUCT_VARIANT_DELETED:"Product variant deleted successfully"
+    PRODUCT_VARIANT_DELETED:"Product variant deleted successfully",
+    ITEM_ADDED_TO_CART:"Item added to cart successfully",
+    CART_FETCHED:"Cart fetched successfully",
+    CART_ITEM_UPDATED:"Cart item updated successfully",
+    CART_ITEM_REMOVED:"Cart item removed successfully",
+    CART_CLEARED:"Cart cleared successfully",
+    ORDER_PLACED:"Order placed successfully"
 };

@@ -6,7 +6,7 @@ import {
     updateCartItem,
 } from "../services/cartService.js";
 import asyncHandler from "../utils/asyncHandler.js";
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 
 export const addItemToCart = asyncHandler(async (req, res) => {
@@ -18,7 +18,7 @@ export const addItemToCart = asyncHandler(async (req, res) => {
     );
     res.status(STATUS_CODES.CREATED).json({
         success: true,
-        message: "Item added to cart successfully",
+        message: MESSAGES.ITEM_ADDED_TO_CART,
         data: cartItem,
     });
 });
@@ -28,7 +28,7 @@ export const getCustomerCart = asyncHandler(async (req, res) => {
     const cart = await getCart(req.user.id);
     res.status(STATUS_CODES.OK).json({
         success: true,
-        message: "Cart fetched successfully",
+        message: MESSAGES.CART_FETCHED,
         data: cart,
     });
 });
@@ -43,7 +43,7 @@ export const updateItemInCart = asyncHandler(async (req, res) => {
     );
     res.status(STATUS_CODES.OK).json({
         success: true,
-        message: "Cart item updated successfully",
+        message: MESSAGES.CART_ITEM_UPDATED,
         data: cartItem,
     });
 });
@@ -56,7 +56,7 @@ export const deleteItemFromCart = asyncHandler(async (req, res) => {
     );
     res.status(STATUS_CODES.OK).json({
         success: true,
-        message: "Cart item removed successfully",
+        message: MESSAGES.CART_ITEM_REMOVED,
     });
 });
 
@@ -65,6 +65,6 @@ export const deleteCustomerCart = asyncHandler(async (req, res) => {
     await clearCart(req.user.id);
     res.status(STATUS_CODES.OK).json({
         success: true,
-        message: "Cart cleared successfully",
+        message: MESSAGES.CART_CLEARED,
     });
 });
