@@ -1,5 +1,5 @@
 import { checkout } from "../services/checkoutService.js";
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 export const checkoutOrder = async (req, res) => {
     try {
@@ -10,7 +10,7 @@ export const checkoutOrder = async (req, res) => {
 
         return res.status(STATUS_CODES.CREATED).json({
             success: true,
-            message: "Order placed successfully",
+            message: MESSAGES.ORDER_PLACED,
             data: result,
         });
     } catch (error) {

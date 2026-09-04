@@ -68,5 +68,11 @@ export const MESSAGES = {
     CART_ITEM_UPDATED:"Cart item updated successfully",
     CART_ITEM_REMOVED:"Cart item removed successfully",
     CART_CLEARED:"Cart cleared successfully",
-    ORDER_PLACED:"Order placed successfully"
+    ORDER_PLACED:"Order placed successfully",
+
+    PAYMENT_FETCHED:"Payments fetched successfully",
+    PAYMENT_METHOD_ADDED:"Payment method added successfully",
+    PAYMENT_METHOD_FETCHED:"Payment methods fetched successfully",
+    PAYMENT_METHOD_DELETED:"Payment method deleted successfully",
+    DEFAULT_PAYMENT_METHOD_UPDATED:"Default payment method updated successfully",
 };

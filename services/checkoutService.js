@@ -107,7 +107,7 @@ export const checkout = async (userId, data) => {
             }
 
             // Product status uses lowercase in your current model
-            if (product.status !== "active") {
+            if (product.status !== "ACTIVE") {
                 throw new Error(
                     `Product "${product.name}" is inactive`
                 );

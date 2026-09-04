@@ -4,44 +4,44 @@ import sequelize from "../config/database.js";
 const Product = sequelize.define(
     "Product",
     {
-        id:{
+        id: {
             type: DataTypes.INTEGER,
-            autoIncrement:true,
-            primaryKey:true,
+            autoIncrement: true,
+            primaryKey: true,
         },
-        sellerId:{
+        sellerId: {
             type: DataTypes.INTEGER,
-            allowNull:false,
-            field:"seller_id",
+            allowNull: false,
+            field: "seller_id",
         },
-        categoryId:{
+        categoryId: {
             type: DataTypes.INTEGER,
-            allowNull:false,
-            field:"category_id",
+            allowNull: false,
+            field: "category_id",
         },
-        name:{
+        name: {
             type: DataTypes.STRING(100),
-            allowNull:false,
+            allowNull: false,
         },
-        description:{
-            type:DataTypes.TEXT,
-            allowNull:true,
+        description: {
+            type: DataTypes.TEXT,
+            allowNull: true,
         },
-        price:{
-            type:DataTypes.DECIMAL(10,2),
-            allowNull:false,
+        price: {
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: false,
         },
-        status:{
-            type:DataTypes.ENUM("active","inactive"),
-            allowNull:false,
-            defaultValue:"active",
+        status: {
+            type: DataTypes.ENUM("ACTIVE", "INACTIVE"),
+            allowNull: false,
+            defaultValue: "ACTIVE",
         },
     },
     {
-        tableName:"products",
-        timestamps:true,
-        createdAt:"created_at",
-        updatedAt:"updated_at",
+        tableName: "products",
+        timestamps: true,
+        createdAt: "created_at",
+        updatedAt: "updated_at",
     }
 );
 
