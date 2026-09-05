@@ -28,7 +28,7 @@ const Payment = sequelize.define(
             type:DataTypes.STRING(50),
             allowNull:false,
         },
-         providerPaymentId: {
+        providerPaymentId: {
             type: DataTypes.STRING(255),
             allowNull: true,
             unique: true,
