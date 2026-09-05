@@ -38,3 +38,4 @@ export const verifyOtpSchema = Joi.object({
             "any.required": "OTP is required",
         }),
 });
+

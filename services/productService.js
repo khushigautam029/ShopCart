@@ -1,6 +1,15 @@
-import { Category, Product } from "../models/index.js";
+import {
+    Attribute,
+    AttributeValue,
+    Category,
+    Inventory,
+    Product,
+    ProductImage,
+    ProductVariant,
+    VariantAttribute,
+} from "../models/index.js";
 
-export const createProduct = async(sellerId ,data )=>{
+export const createProduct = async (sellerId, data) => {
     const category = await Category.findByPk(data.categoryId);
     if (!category) {
         throw new Error("Category not found");
@@ -29,6 +38,17 @@ export const getAllProducts = async () => {
                 as: "category",
                 attributes: ["id", "name"],
             },
+            {
+                model: ProductImage,
+                as: "images",
+                attributes: [
+                    "id",
+                    "imageUrl",
+                    "isPrimary",
+                    "sortOrder",
+                ],
+                order: [["sortOrder", "ASC"]],
+            },
         ],
         order: [["created_at", "DESC"]],
     });
@@ -45,6 +65,59 @@ export const getProductById = async (id) => {
                 model: Category,
                 as: "category",
                 attributes: ["id", "name"],
+            },
+            {
+                model: ProductImage,
+                as: "images",
+                attributes: [
+                    "id",
+                    "imageUrl",
+                    "isPrimary",
+                    "sortOrder",
+                ],
+            },
+            {
+                model: ProductVariant,
+                as: "variants",
+                where: {
+                    status: "ACTIVE",
+                },
+                required: false,
+                attributes: [
+                    "id",
+                    "sku",
+                    "price",
+                    "status",
+                ],
+                include: [
+                    {
+                        model: VariantAttribute,
+                        as: "variantAttributes",
+                        attributes: ["id"],
+                        include: [
+                            {
+                                model: AttributeValue,
+                                as: "attributeValue",
+                                attributes: ["id", "value"],
+                                include: [
+                                    {
+                                        model: Attribute,
+                                        as: "attribute",
+                                        attributes: ["id", "name"],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                    {
+                        model: Inventory,
+                        as: "inventory",
+                        attributes: [
+                            "quantity",
+                            "reservedQuantity",
+                        ],
+                    },
+                ],
             },
         ],
     });
@@ -70,7 +143,6 @@ export const updateProduct = async (
             "Product not found or you are not authorized to update it"
         );
     }
-    // If category is being changed, verify it
     if (data.categoryId) {
         const category = await Category.findByPk(
             data.categoryId

@@ -17,24 +17,20 @@ export const createProductVariant = async (
             sellerId,
         },
     });
-
     if (!product) {
         throw new Error(
             "Product not found or you are not authorized"
         );
     }
-
     // Check SKU
     const existingSku = await ProductVariant.findOne({
         where: {
             sku: data.sku,
         },
     });
-
     if (existingSku) {
         throw new Error("SKU already exists");
     }
-
     // Check attribute values
     const attributeValues =
         await AttributeValue.findAll({
@@ -42,7 +38,6 @@ export const createProductVariant = async (
                 id: data.attributeValueIds,
             },
         });
-
     if (
         attributeValues.length !==
         data.attributeValueIds.length
@@ -51,12 +46,10 @@ export const createProductVariant = async (
             "One or more attribute values not found"
         );
     }
-
     // Make sure attribute values are unique by attribute
     const attributeIds = attributeValues.map(
         (item) => item.attributeId
     );
-
     if (
         new Set(attributeIds).size !==
         attributeIds.length
@@ -65,14 +58,12 @@ export const createProductVariant = async (
             "A variant cannot have multiple values of the same attribute"
         );
     }
-
     const variant = await ProductVariant.create({
         productId,
         sku: data.sku,
         price: data.price ?? product.price,
         status: data.status ?? "ACTIVE",
     });
-
     await VariantAttribute.bulkCreate(
         data.attributeValueIds.map(
             (attributeValueId) => ({
@@ -81,7 +72,6 @@ export const createProductVariant = async (
             })
         )
     );
-
     return await getProductVariantById(
         productId,
         variant.id
@@ -97,11 +87,9 @@ export const getProductVariants = async (
             status: "ACTIVE",
         },
     });
-
     if (!product) {
         throw new Error("Product not found");
     }
-
     return await ProductVariant.findAll({
         where: {
             productId,
@@ -145,11 +133,9 @@ export const getProductVariantById = async (
                 },
             ],
         });
-
     if (!variant) {
         throw new Error("Product variant not found");
     }
-
     return variant;
 };
 
@@ -165,13 +151,11 @@ export const updateProductVariant = async (
             sellerId,
         },
     });
-
     if (!product) {
         throw new Error(
             "Product not found or you are not authorized"
         );
     }
-
     const variant =
         await ProductVariant.findOne({
             where: {
@@ -179,11 +163,9 @@ export const updateProductVariant = async (
                 productId,
             },
         });
-
     if (!variant) {
         throw new Error("Product variant not found");
     }
-
     if (
         data.sku &&
         data.sku !== variant.sku
@@ -194,12 +176,10 @@ export const updateProductVariant = async (
                     sku: data.sku,
                 },
             });
-
         if (existingSku) {
             throw new Error("SKU already exists");
         }
     }
-
     if (data.attributeValueIds) {
         const attributeValues =
             await AttributeValue.findAll({
@@ -207,7 +187,6 @@ export const updateProductVariant = async (
                     id: data.attributeValueIds,
                 },
             });
-
         if (
             attributeValues.length !==
             data.attributeValueIds.length
@@ -216,12 +195,10 @@ export const updateProductVariant = async (
                 "One or more attribute values not found"
             );
         }
-
         const attributeIds =
             attributeValues.map(
                 (item) => item.attributeId
             );
-
         if (
             new Set(attributeIds).size !==
             attributeIds.length
@@ -230,13 +207,11 @@ export const updateProductVariant = async (
                 "A variant cannot have multiple values of the same attribute"
             );
         }
-
         await VariantAttribute.destroy({
             where: {
                 variantId,
             },
         });
-
         await VariantAttribute.bulkCreate(
             data.attributeValueIds.map(
                 (attributeValueId) => ({
@@ -246,21 +221,17 @@ export const updateProductVariant = async (
             )
         );
     }
-
     await variant.update({
         ...(data.sku !== undefined && {
             sku: data.sku,
         }),
-
         ...(data.price !== undefined && {
             price: data.price,
         }),
-
         ...(data.status !== undefined && {
             status: data.status,
         }),
     });
-
     return await getProductVariantById(
         productId,
         variantId
@@ -278,13 +249,11 @@ export const deleteProductVariant = async (
             sellerId,
         },
     });
-
     if (!product) {
         throw new Error(
             "Product not found or you are not authorized"
         );
     }
-
     const variant =
         await ProductVariant.findOne({
             where: {
@@ -292,18 +261,14 @@ export const deleteProductVariant = async (
                 productId,
             },
         });
-
     if (!variant) {
         throw new Error("Product variant not found");
     }
-
     await VariantAttribute.destroy({
         where: {
             variantId,
         },
     });
-
     await variant.destroy();
-
     return true;
 };
