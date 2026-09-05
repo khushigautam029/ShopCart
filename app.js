@@ -16,6 +16,7 @@ import paymentRoutes from "./routes/paymentRoutes.js";
 import productImageRoutes from "./routes/productImageRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import productVariantRoutes from "./routes/productVariantRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
 import errorHandler from "./utils/errorHandler.js";
 import { generalLimiter, } from "./utils/rateLimiter.js";
 import { MESSAGES, STATUS_CODES } from "./utils/setConstants.js";
@@ -66,6 +67,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/payment-method",paymentMethodRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/checkout", checkoutRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 //Global error handler
 app.use(errorHandler);

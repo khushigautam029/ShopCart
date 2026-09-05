@@ -13,6 +13,7 @@ import PaymentMethod from "./PaymentMethod.js";
 import Product from "./Product.js";
 import ProductImage from "./ProductImage.js";
 import ProductVariant from "./ProductVariant.js";
+import Review from "./Review.js";
 import User from "./User.js";
 import VariantAttribute from "./VariantAttribute.js";
 import SellerProfile from "./sellerProfile.js";
@@ -230,11 +231,29 @@ Payment.belongsTo(PaymentMethod, {
     as: "paymentMethod",
 });
 
+User.hasMany(Review, {
+    foreignKey: "userId",
+    as: "reviews",
+});
 
+Review.belongsTo(User, {
+    foreignKey: "userId",
+    as: "user",
+});
+
+Product.hasMany(Review, {
+    foreignKey: "productId",
+    as: "reviews",
+});
+
+Review.belongsTo(Product, {
+    foreignKey: "productId",
+    as: "product",
+});
 
 export {
     Address, Attribute,
     AttributeValue, Cart, CartItem, Category, Inventory, Order, OrderItem, OtpVerification, Payment, PaymentMethod, Product,
-    ProductImage, ProductVariant, SellerProfile, User, VariantAttribute
+    ProductImage, ProductVariant, Review, SellerProfile, User, VariantAttribute
 };
 
