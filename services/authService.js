@@ -5,8 +5,7 @@ import { createAndSendOtp } from "./otpService.js";
 export const loginWithPhone = async (phone) => {
     // First check if the phone already exists
     let user = await User.findOne({
-        
-        attributes: ["id","phone"],
+        attributes: ["id", "phone"],
         where: {
             phone,
         },
@@ -20,7 +19,6 @@ export const loginWithPhone = async (phone) => {
                 "This phone number belongs to a seller account. Please use seller login."
             );
         }
-
         // Customer status checks
         if (user.status === "BLOCKED") {
             throw new Error("Your account has been blocked");
@@ -42,9 +40,12 @@ export const loginWithPhone = async (phone) => {
     }
 
     // Send OTP
-    await createAndSendOtp(phone);
-
-    return user;
+    const otpData = await createAndSendOtp(phone);
+    return {
+        user,
+        otp: otpData.otp,
+        expiresAt: otpData.expiresAt,
+    };
 };
 
 export const verifyLoginOtp = async (phone, otp) => {
@@ -125,11 +126,11 @@ export const loginSellerWithPhone = async (phone) => {
         throw new Error("Your seller account is inactive");
     }
 
-    await createAndSendOtp(phone);
-
+    const otp = await createAndSendOtp(phone);
     return {
         phone,
         role: user.role,
+        otp,
     };
 };
 

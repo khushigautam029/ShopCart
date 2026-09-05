@@ -1,15 +1,27 @@
-export const sendSuccess = ( res , statusCode , message , data = null) => {
+export const sendSuccess = (
+    res,
+    statusCode,
+    message,
+    data = null
+) => {
     return res.status(statusCode).json({
-        success:true,
+        success: true,
+        statusCode,
         message,
-        ...(data || {})
+        ...(data || {}),
     });
 };
 
-export const sendError = ( res , statusCode , message , errors = null) => {
+export const sendError = (
+    res,
+    statusCode,
+    message,
+    errors = null
+) => {
     return res.status(statusCode).json({
-        sendSuccess:false,
+        success: false,
+        statusCode,
         message,
-        ...(errors && { errors })
+        ...(errors && { errors }),
     });
 };

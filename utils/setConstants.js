@@ -19,6 +19,9 @@ export const STATUS_CODES = {
 
 export const MESSAGES = {
     TOO_MANY_REQUESTS: "Too many requests. Please try again later.",
+    TOO_MANY_LOGIN_REQUESTS: "Too many login requests. Please try again later.",
+    TOO_MANY_OTP_REQUESTS: "Too many Otp requests. Please try again later.",
+
     API_RUNNING: "ShopCart API is running",
     VALIDATION_FAILED: "Validation failed",
     AUTHENTICATION_REQUIRED: "Authentication required",
