@@ -13,15 +13,15 @@ export const createAddressSchema = Joi.object({
             "any.required": "Full name is required",
         }),
 
-    phone: Joi.string()
-        .pattern(/^[6-9]\d{9}$/)
-        .required()
-        .messages({
-            "string.empty": "Phone number is required",
-            "string.pattern.base":
-                "Please enter a valid 10-digit Indian phone number",
-            "any.required": "Phone number is required",
-        }),
+    // phone: Joi.string()
+    //     .pattern(/^[6-9]\d{9}$/)
+    //     .required()
+    //     .messages({
+    //         "string.empty": "Phone number is required",
+    //         "string.pattern.base":
+    //             "Please enter a valid 10-digit Indian phone number",
+    //         "any.required": "Phone number is required",
+    //     }),
 
     addressLine1: Joi.string()
         .trim()

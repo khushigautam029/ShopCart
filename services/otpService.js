@@ -15,12 +15,12 @@ export const createAndSendOtp = async (phone) => {
     });
 
     if (process.env.OTP_PROVIDER === "console") {
-        console.log(`📱 OTP for ${phone}: ${otp}`);
+        // console.log(`📱 OTP for ${phone}: ${otp}`);
     }
 
     if (process.env.OTP_PROVIDER === "sms") {
         // SMS provider will be integrated here later
-        console.log("📲 SMS OTP provider is enabled");
+        // console.log("📲 SMS OTP provider is enabled");
     }
 
     return {

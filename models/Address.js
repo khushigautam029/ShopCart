@@ -24,7 +24,7 @@ const Address = sequelize.define(
 
         phone: {
             type: DataTypes.STRING(15),
-            allowNull: false,
+            allowNull: true,
         },
 
         addressLine1: {
