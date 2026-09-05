@@ -4,6 +4,7 @@ import {
     getPaymentMethods,
     setDefaultPaymentMethod,
 } from "../services/paymentMethodService.js";
+import { sendError, sendSuccess } from "../utils/responseHandler.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 export const createPaymentMethod = async (req, res) => {
@@ -12,17 +13,18 @@ export const createPaymentMethod = async (req, res) => {
             req.user.id,
             req.body
         );
-
-        return res.status(STATUS_CODES.CREATED).json({
-            success: true,
-            message: MESSAGES.PAYMENT_METHOD_ADDED,
-            data: paymentMethod,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.CREATED,
+            MESSAGES.PAYMENT_METHOD_ADDED,
+            { data: paymentMethod }
+        );
     } catch (error) {
-        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message: error.message,
-        });
+        return sendError(
+            res,
+            STATUS_CODES.INTERNAL_SERVER_ERROR,
+            error.message
+        );
     }
 };
 
@@ -31,17 +33,18 @@ export const getMyPaymentMethods = async (req, res) => {
         const paymentMethods = await getPaymentMethods(
             req.user.id
         );
-
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.PAYMENT_METHOD_FETCHED,
-            data: paymentMethods,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.PAYMENT_METHOD_FETCHED,
+            { data: paymentMethods }
+        );
     } catch (error) {
-        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message: error.message,
-        });
+        return sendError(
+            res,
+            STATUS_CODES.INTERNAL_SERVER_ERROR,
+            error.message
+        );
     }
 };
 
@@ -51,16 +54,17 @@ export const removePaymentMethod = async (req, res) => {
             req.user.id,
             req.params.id
         );
-
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.PAYMENT_METHOD_DELETED,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.PAYMENT_METHOD_DELETED
+        );
     } catch (error) {
-        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message: error.message,
-        });
+        return sendError(
+            res,
+            STATUS_CODES.INTERNAL_SERVER_ERROR,
+            error.message
+        );
     }
 };
 
@@ -70,16 +74,17 @@ export const makeDefaultPaymentMethod = async (req, res) => {
             req.user.id,
             req.params.id
         );
-
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.DEFAULT_PAYMENT_METHOD_UPDATED,
-            data: paymentMethod,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.DEFAULT_PAYMENT_METHOD_UPDATED,
+            { data: paymentMethod }
+        );
     } catch (error) {
-        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message: error.message,
-        });
+        return sendError(
+            res,
+            STATUS_CODES.INTERNAL_SERVER_ERROR,
+            error.message
+        );
     }
 };

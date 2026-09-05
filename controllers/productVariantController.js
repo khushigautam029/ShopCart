@@ -5,6 +5,7 @@ import {
     getProductVariants,
     updateProductVariant,
 } from "../services/productVariantService.js";
+import { sendError, sendSuccess } from "../utils/responseHandler.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 export const create = async (req, res) => {
@@ -15,20 +16,18 @@ export const create = async (req, res) => {
                 req.user.id,
                 req.body
             );
-        return res.status(
-            STATUS_CODES.CREATED
-        ).json({
-            success: true,
-            message:MESSAGES.PRODUCT_VARIANT_CREATED,
-            data: variant,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.CREATED,
+            MESSAGES.PRODUCT_VARIANT_CREATED,
+            { data: variant }
+        );
     } catch (error) {
-        return res.status(
-            STATUS_CODES.BAD_REQUEST
-        ).json({
-            success: false,
-            message: error.message,
-        });
+        return sendError(
+            res,
+            STATUS_CODES.BAD_REQUEST,
+            error.message
+        );
     }
 };
 
@@ -38,20 +37,18 @@ export const getAll = async (req, res) => {
             await getProductVariants(
                 req.params.productId
             );
-        return res.status(
-            STATUS_CODES.OK
-        ).json({
-            success: true,
-            message:MESSAGES.PRODUCT_VARIANTS_FETCHED,
-            data: variants,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.PRODUCT_VARIANTS_FETCHED,
+            { data: variants }
+        );
     } catch (error) {
-        return res.status(
-            STATUS_CODES.NOT_FOUND
-        ).json({
-            success: false,
-            message: error.message,
-        });
+        return sendError(
+            res,
+            STATUS_CODES.NOT_FOUND,
+            error.message
+        );
     }
 };
 
@@ -62,20 +59,18 @@ export const getById = async (req, res) => {
                 req.params.productId,
                 req.params.variantId
             );
-        return res.status(
-            STATUS_CODES.OK
-        ).json({
-            success: true,
-            message:MESSAGES.PRODUCT_VARIANTS_FETCHED,
-            data: variant,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.PRODUCT_VARIANTS_FETCHED,
+            { data: variant }
+        );
     } catch (error) {
-        return res.status(
-            STATUS_CODES.NOT_FOUND
-        ).json({
-            success: false,
-            message: error.message,
-        });
+        return sendError(
+            res,
+            STATUS_CODES.NOT_FOUND,
+            error.message
+        );
     }
 };
 
@@ -88,20 +83,18 @@ export const update = async (req, res) => {
                 req.user.id,
                 req.body
             );
-        return res.status(
-            STATUS_CODES.OK
-        ).json({
-            success: true,
-            message:MESSAGES.PRODUCT_VARIANT_UPDATED,
-            data: variant,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.PRODUCT_VARIANT_UPDATED,
+            { data: variant }
+        );
     } catch (error) {
-        return res.status(
-            STATUS_CODES.BAD_REQUEST
-        ).json({
-            success: false,
-            message: error.message,
-        });
+        return sendError(
+            res,
+            STATUS_CODES.BAD_REQUEST,
+            error.message
+        );
     }
 };
 
@@ -112,18 +105,16 @@ export const remove = async (req, res) => {
             req.params.variantId,
             req.user.id
         );
-        return res.status(
-            STATUS_CODES.OK
-        ).json({
-            success: true,
-            message:MESSAGES.PRODUCT_VARIANT_DELETED,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.PRODUCT_VARIANT_DELETED
+        );
     } catch (error) {
-        return res.status(
-            STATUS_CODES.BAD_REQUEST
-        ).json({
-            success: false,
-            message: error.message,
-        });
+        return sendError(
+            res,
+            STATUS_CODES.BAD_REQUEST,
+            error.message
+        );
     }
 };
