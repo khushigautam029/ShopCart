@@ -5,39 +5,42 @@ import {
     getAttributeById,
     updateAttribute,
 } from "../services/attributeService.js";
+import { sendError, sendSuccess } from "../utils/responseHandler.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 export const create = async (req, res) => {
     try {
         const attribute = await createAttribute(req.body);
-        return res.status(STATUS_CODES.CREATED).json({
-            success: true,
-            message: MESSAGES.ATTRIBUTE_CREATED,
-            data: attribute,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.CREATED,
+            MESSAGES.ATTRIBUTE_CREATED,
+            { data: attribute }
+        );
     } catch (error) {
-        return res.status(STATUS_CODES.BAD_REQUEST).json({
-            success: false,
-            message: error.message,
-        });
+        return sendError(
+            res,
+            STATUS_CODES.BAD_REQUEST,
+            error.message
+        );
     }
 };
 
 export const getAll = async (req, res) => {
     try {
         const attributes = await getAllAttributes();
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.ATTRIBUTE_FETCHED,
-            data: attributes,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.ATTRIBUTE_FETCHED,
+            { data: attributes }
+        );
     } catch (error) {
-        return res.status(
-            STATUS_CODES.INTERNAL_SERVER_ERROR
-        ).json({
-            success: false,
-            message: error.message,
-        });
+        return sendError(
+            res,
+            STATUS_CODES.INTERNAL_SERVER_ERROR,
+            error.message
+        );
     }
 };
 
@@ -46,16 +49,18 @@ export const getById = async (req, res) => {
         const attribute = await getAttributeById(
             req.params.id
         );
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.ATTRIBUTE_FETCHED,
-            data: attribute,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.ATTRIBUTE_FETCHED,
+            { data: attribute }
+        );
     } catch (error) {
-        return res.status(STATUS_CODES.NOT_FOUND).json({
-            success: false,
-            message: error.message,
-        });
+        return sendError(
+            res,
+            STATUS_CODES.NOT_FOUND,
+            error.message
+        );
     }
 };
 
@@ -65,30 +70,34 @@ export const update = async (req, res) => {
             req.params.id,
             req.body
         );
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.ATTRIBUTE_UPDATED,
-            data: attribute,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.ATTRIBUTE_UPDATED,
+            { data: attribute }
+        );
     } catch (error) {
-        return res.status(STATUS_CODES.BAD_REQUEST).json({
-            success: false,
-            message: error.message,
-        });
+        return sendError(
+            res,
+            STATUS_CODES.BAD_REQUEST,
+            error.message
+        );
     }
 };
 
 export const remove = async (req, res) => {
     try {
         await deleteAttribute(req.params.id);
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.ATTRIBUTE_DELETED,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.ATTRIBUTE_DELETED
+        );
     } catch (error) {
-        return res.status(STATUS_CODES.NOT_FOUND).json({
-            success: false,
-            message: error.message,
-        });
+        return sendError(
+            res,
+            STATUS_CODES.NOT_FOUND,
+            error.message
+        );
     }
 };

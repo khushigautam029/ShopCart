@@ -5,6 +5,7 @@ import {
     getAttributeValues,
     updateAttributeValue,
 } from "../services/attributeValueService.js";
+import { sendError, sendSuccess } from "../utils/responseHandler.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 export const create = async (req, res) => {
@@ -13,16 +14,18 @@ export const create = async (req, res) => {
             req.params.attributeId,
             req.body
         );
-        return res.status(STATUS_CODES.CREATED).json({
-            success: true,
-            message: MESSAGES.ATTRIBUTE_VALUE_CREATED,
-            data: value,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.CREATED,
+            MESSAGES.ATTRIBUTE_VALUE_CREATED,
+            { data: value }
+        );
     } catch (error) {
-        return res.status(STATUS_CODES.BAD_REQUEST).json({
-            success: false,
-            message: error.message,
-        });
+        return sendError(
+            res,
+            STATUS_CODES.BAD_REQUEST,
+            error.message
+        );
     }
 };
 
@@ -31,16 +34,18 @@ export const getAll = async (req, res) => {
         const values = await getAttributeValues(
             req.params.attributeId
         );
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.ATTRIBUTE_VALUE_FETCHED,
-            data: values,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.ATTRIBUTE_VALUE_FETCHED,
+            { data: values }
+        );
     } catch (error) {
-        return res.status(STATUS_CODES.NOT_FOUND).json({
-            success: false,
-            message: error.message,
-        });
+        return sendError(
+            res,
+            STATUS_CODES.NOT_FOUND,
+            error.message
+        );
     }
 };
 
@@ -50,16 +55,18 @@ export const getById = async (req, res) => {
             req.params.attributeId,
             req.params.valueId
         );
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.ATTRIBUTE_VALUE_FETCHED,
-            data: value,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.ATTRIBUTE_VALUE_FETCHED,
+            { data: value }
+        );
     } catch (error) {
-        return res.status(STATUS_CODES.NOT_FOUND).json({
-            success: false,
-            message: error.message,
-        });
+        return sendError(
+            res,
+            STATUS_CODES.NOT_FOUND,
+            error.message
+        );
     }
 };
 
@@ -70,16 +77,18 @@ export const update = async (req, res) => {
             req.params.valueId,
             req.body
         );
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.ATTRIBUTE_VALUE_UPDATED,
-            data: value,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.ATTRIBUTE_VALUE_UPDATED,
+            { data: value }
+        );
     } catch (error) {
-        return res.status(STATUS_CODES.BAD_REQUEST).json({
-            success: false,
-            message: error.message,
-        });
+        return sendError(
+            res,
+            STATUS_CODES.BAD_REQUEST,
+            error.message
+        );
     }
 };
 
@@ -89,14 +98,16 @@ export const remove = async (req, res) => {
             req.params.attributeId,
             req.params.valueId
         );
-        return res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.ATTRIBUTE_VALUE_DELETED ,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.ATTRIBUTE_VALUE_DELETED
+        );
     } catch (error) {
-        return res.status(STATUS_CODES.NOT_FOUND).json({
-            success: false,
-            message: error.message,
-        });
+        return sendError(
+            res,
+            STATUS_CODES.NOT_FOUND,
+            error.message
+        );
     }
 };

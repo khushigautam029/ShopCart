@@ -5,6 +5,8 @@ import { createAndSendOtp } from "./otpService.js";
 export const loginWithPhone = async (phone) => {
     // First check if the phone already exists
     let user = await User.findOne({
+        
+        attributes: ["id","phone"],
         where: {
             phone,
         },
@@ -42,10 +44,7 @@ export const loginWithPhone = async (phone) => {
     // Send OTP
     await createAndSendOtp(phone);
 
-    return {
-        phone,
-        role: user.role,
-    };
+    return user;
 };
 
 export const verifyLoginOtp = async (phone, otp) => {
