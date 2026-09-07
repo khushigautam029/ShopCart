@@ -84,17 +84,15 @@ export const removeFromWishlist = async(userId , productId) => {
     if (!wishlist){
         throw new Error ("WishList not found");
     }
-    const wishlistItem = await wishlistItem.findOne({
-        where:{
-            wishlistId:wishlist.id,
-            productId,
-        }
-    });
+    const wishlistItem = await WishlistItem.findOne({
+    where: {
+        wishlistId: wishlist.id,
+        productId,
+    },
+});
     if (!wishlistItem){
         throw new Error ("Product is not in your wishlist");
     }
-
     await wishlistItem.destroy();
     return true;
 };
-

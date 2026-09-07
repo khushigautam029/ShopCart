@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import {
     Attribute,
     AttributeValue,
@@ -27,11 +28,83 @@ export const createProduct = async (sellerId, data) => {
     return product;
 };
 
-export const getAllProducts = async () => {
+export const getAllProducts = async (filters = {}) => {
+    const {
+        search,
+        categoryId,
+        minPrice,
+        maxPrice,
+        sortBy = "created_at",
+        order = "DESC",
+    } = filters;
+
+    const where = {
+        status: "ACTIVE",
+    };
+
+    // SEARCH
+    if (search && search.trim() !== "") {
+        where[Op.or] = [
+            {
+                name: {
+                    [Op.like]: `%${search.trim()}%`,
+                },
+            },
+            {
+                description: {
+                    [Op.like]: `%${search.trim()}%`,
+                },
+            },
+        ];
+    }
+
+    // CATEGORY
+    if (categoryId) {
+        where.categoryId = Number(categoryId);
+    }
+
+    // PRICE
+    const hasMinPrice =
+        minPrice !== undefined &&
+        minPrice !== "" &&
+        !isNaN(Number(minPrice));
+
+    const hasMaxPrice =
+        maxPrice !== undefined &&
+        maxPrice !== "" &&
+        !isNaN(Number(maxPrice));
+
+    if (hasMinPrice || hasMaxPrice) {
+        where.price = {};
+
+        if (hasMinPrice) {
+            where.price[Op.gte] = Number(minPrice);
+        }
+
+        if (hasMaxPrice) {
+            where.price[Op.lte] = Number(maxPrice);
+        }
+    }
+
+    // SORT
+    const allowedSortFields = [
+        "price",
+        "created_at",
+        "name",
+    ];
+
+    const finalSortBy = allowedSortFields.includes(sortBy)
+        ? sortBy
+        : "created_at";
+
+    const finalOrder =
+        String(order).toUpperCase() === "ASC"
+            ? "ASC"
+            : "DESC";
+
     return await Product.findAll({
-        where: {
-            status: "ACTIVE",
-        },
+        where,
+
         include: [
             {
                 model: Category,
@@ -47,10 +120,12 @@ export const getAllProducts = async () => {
                     "isPrimary",
                     "sortOrder",
                 ],
-                order: [["sortOrder", "ASC"]],
             },
         ],
-        order: [["created_at", "DESC"]],
+
+        order: [
+            [finalSortBy, finalOrder],
+        ],
     });
 };
 

@@ -31,7 +31,7 @@ export const create = async (req, res) => {
 
 export const getAll = async (req, res) => {
     try {
-        const products = await getAllProducts();
+        const products = await getAllProducts(req.query);
         return sendSuccess(
             res,
             STATUS_CODES.OK,
