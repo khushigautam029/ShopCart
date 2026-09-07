@@ -17,6 +17,8 @@ import Review from "./Review.js";
 import SellerProfile from "./SellerProfile.js";
 import User from "./User.js";
 import VariantAttribute from "./VariantAttribute.js";
+import Wishlist from "./Wishlist.js";
+import WishlistItem from "./WishlistItem.js";
 
 // USER ↔ SELLER PROFILE
 User.hasOne(SellerProfile, {
@@ -278,6 +280,38 @@ Review.belongsTo(Product, {
     as: "product",
 });
 
+// USER ↔ WISHLIST
+User.hasOne(Wishlist, {
+    foreignKey: "userId",
+    as: "wishlist",
+});
+
+Wishlist.belongsTo(User, {
+    foreignKey: "userId",
+    as: "user",
+});
+
+// WISHLIST ↔ WISHLIST ITEM 
+Wishlist.hasMany(WishlistItem, {
+    foreignKey: "wishlistId",
+    as: "items",
+});
+
+WishlistItem.belongsTo(Wishlist, {
+    foreignKey: "wishlistId",
+    as: "wishlist",
+});
+
+// PRODUCT ↔ WISHLIST ITEM 
+Product.hasMany(WishlistItem, {
+    foreignKey: "productId",
+    as: "wishlistItems",
+});
+
+WishlistItem.belongsTo(Product, {
+    foreignKey: "productId",
+    as: "product",
+});
 
 // EXPORT MODELS
 export {
@@ -299,6 +333,7 @@ export {
     Review,
     SellerProfile,
     User,
-    VariantAttribute
+    VariantAttribute,
+    Wishlist, WishlistItem
 };
 

@@ -87,7 +87,6 @@ export const updateAttributeValue = async (
                     value: data.value,
                 },
             });
-
         if (existingValue) {
             throw new Error(
                 "Attribute value already exists"
