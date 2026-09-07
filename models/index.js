@@ -7,6 +7,7 @@ import Category from "./Category.js";
 import Inventory from "./Inventory.js";
 import Order from "./Order.js";
 import OrderItem from "./OrderItem.js";
+import OrderStatusHistory from "./OrderStatusHistory.js";
 import OtpVerification from "./OtpVerification.js";
 import Payment from "./Payment.js";
 import PaymentMethod from "./PaymentMethod.js";
@@ -313,6 +314,28 @@ WishlistItem.belongsTo(Product, {
     as: "product",
 });
 
+// ORDER ↔ ORDER STATUS HISTORY
+Order.hasMany(OrderStatusHistory, {
+    foreignKey: "orderId",
+    as: "statusHistory",
+});
+
+OrderStatusHistory.belongsTo(Order, {
+    foreignKey: "orderId",
+    as: "order",
+});
+
+// USER ↔ ORDER STATUS HISTORY
+User.hasMany(OrderStatusHistory, {
+    foreignKey: "changedBy",
+    as: "orderStatusChanges",
+});
+
+OrderStatusHistory.belongsTo(User, {
+    foreignKey: "changedBy",
+    as: "changedByUser",
+});
+
 // EXPORT MODELS
 export {
     Address,
@@ -323,8 +346,7 @@ export {
     Category,
     Inventory,
     Order,
-    OrderItem,
-    OtpVerification,
+    OrderItem, OrderStatusHistory, OtpVerification,
     Payment,
     PaymentMethod,
     Product,
