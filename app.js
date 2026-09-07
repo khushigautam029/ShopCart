@@ -11,6 +11,7 @@ import categoryRoutes from "./routes/categoryRoutes.js";
 import checkoutRoutes from "./routes/checkoutRoutes.js";
 import inventoryRoutes from "./routes/inventoryRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import orderStatusHistoryRoutes from "./routes/orderStatusHistoryRoutes.js";
 import paymentMethodRoutes from "./routes/paymentMethodRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import productImageRoutes from "./routes/productImageRoutes.js";
@@ -70,6 +71,7 @@ app.use("/api/payment", paymentRoutes);
 app.use("/api/checkout", checkoutRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/wishlist", wishlistRoutes);
+app.use( "/api/order-status-history", orderStatusHistoryRoutes);
 
 //Global error handler
 app.use(errorHandler);
