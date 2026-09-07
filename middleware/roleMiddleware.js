@@ -10,6 +10,7 @@ const authorizeRoles = (...roles) => {
                 MESSAGES.AUTHENTICATION_REQUIRED
             );
         }
+
         if (!roles.includes(req.user.role)) {
             return sendError(
                 res,
@@ -17,6 +18,7 @@ const authorizeRoles = (...roles) => {
                 MESSAGES.ACCESS_DENIED
             );
         }
+
         next();
     };
 };
