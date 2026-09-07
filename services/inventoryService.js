@@ -19,7 +19,6 @@ const getVariantForSeller = async (variantId, sellerId) => {
             },
         ],
     });
-
     return variant;
 };
 
@@ -48,7 +47,6 @@ export const getInventory = async (sellerId) => {
         ],
         order: [["updated_at", "DESC"]],
     });
-
     return inventory;
 };
 
@@ -60,11 +58,9 @@ export const getInventoryByVariant = async (
         variantId,
         sellerId
     );
-
     if (!variant) {
         throw new Error("Product variant not found");
     }
-
     const inventory = await Inventory.findOne({
         where: {
             variantId,
@@ -87,7 +83,6 @@ export const getInventoryByVariant = async (
             },
         ],
     });
-
     return inventory;
 };
 
@@ -100,28 +95,22 @@ export const updateInventory = async (
         variantId,
         sellerId
     );
-
     if (!variant) {
         throw new Error("Product variant not found");
     }
-
     const quantity = data.quantity;
-
     const reservedQuantity =
         data.reservedQuantity ?? 0;
-
     if (reservedQuantity > quantity) {
         throw new Error(
             "Reserved quantity cannot be greater than total quantity"
         );
     }
-
     let inventory = await Inventory.findOne({
         where: {
             variantId,
         },
     });
-
     if (!inventory) {
         inventory = await Inventory.create({
             variantId,
@@ -131,9 +120,7 @@ export const updateInventory = async (
     } else {
         inventory.quantity = quantity;
         inventory.reservedQuantity = reservedQuantity;
-
         await inventory.save();
     }
-
     return inventory;
 };

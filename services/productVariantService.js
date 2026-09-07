@@ -10,7 +10,6 @@ export const createProductVariant = async (
     sellerId,
     data
 ) => {
-    // Check product ownership
     const product = await Product.findOne({
         where: {
             id: productId,
@@ -22,7 +21,6 @@ export const createProductVariant = async (
             "Product not found or you are not authorized"
         );
     }
-    // Check SKU
     const existingSku = await ProductVariant.findOne({
         where: {
             sku: data.sku,
@@ -31,7 +29,6 @@ export const createProductVariant = async (
     if (existingSku) {
         throw new Error("SKU already exists");
     }
-    // Check attribute values
     const attributeValues =
         await AttributeValue.findAll({
             where: {
@@ -46,7 +43,6 @@ export const createProductVariant = async (
             "One or more attribute values not found"
         );
     }
-    // Make sure attribute values are unique by attribute
     const attributeIds = attributeValues.map(
         (item) => item.attributeId
     );
