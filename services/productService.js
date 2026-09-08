@@ -7,7 +7,9 @@ import {
     Product,
     ProductImage,
     ProductVariant,
-    VariantAttribute,
+    Review,
+    User,
+    VariantAttribute
 } from "../models/index.js";
 
 // GET ALL PRODUCTS
@@ -153,11 +155,16 @@ export const getProductById = async (id) => {
             status: "ACTIVE",
         },
         include: [
+            // CATEGORY
             {
                 model: Category,
                 as: "category",
-                attributes: ["id", "name"],
+                attributes: [
+                    "id",
+                    "name",
+                ],
             },
+            // PRODUCT IMAGES
             {
                 model: ProductImage,
                 as: "images",
@@ -167,7 +174,11 @@ export const getProductById = async (id) => {
                     "isPrimary",
                     "sortOrder",
                 ],
+                order: [
+                    ["sortOrder", "ASC"],
+                ],
             },
+            // PRODUCT VARIANTS
             {
                 model: ProductVariant,
                 as: "variants",
@@ -181,12 +192,14 @@ export const getProductById = async (id) => {
                     "price",
                     "status",
                 ],
-
                 include: [
+                    // VARIANT ATTRIBUTES
                     {
                         model: VariantAttribute,
                         as: "variantAttributes",
-                        attributes: ["id"],
+                        attributes: [
+                            "id",
+                        ],
                         include: [
                             {
                                 model: AttributeValue,
@@ -195,6 +208,7 @@ export const getProductById = async (id) => {
                                     "id",
                                     "value",
                                 ],
+
                                 include: [
                                     {
                                         model: Attribute,
@@ -208,6 +222,7 @@ export const getProductById = async (id) => {
                             },
                         ],
                     },
+                    // INVENTORY
                     {
                         model: Inventory,
                         as: "inventory",
@@ -218,12 +233,104 @@ export const getProductById = async (id) => {
                     },
                 ],
             },
+            // REVIEWS
+            {
+                model: Review,
+                as: "reviews",
+                where: {
+                    status: "PUBLISHED",
+                },
+                required: false,
+                attributes: [
+                    "id",
+                    "rating",
+                    "comment",
+                    "created_at",
+                ],
+                include: [
+                    {
+                        model: User,
+                        as: "user",
+                        attributes: [
+                            "id",
+                            "name",
+                        ],
+                    },
+                ],
+            },
         ],
     });
     if (!product) {
         throw new Error("Product not found");
     }
-    return product;
+    // CALCULATE RATING
+    const reviews = product.reviews || [];
+    const reviewCount = reviews.length;
+    const averageRating =
+        reviewCount > 0
+            ? Number(
+                  (
+                      reviews.reduce(
+                          (sum, review) =>
+                              sum +
+                              Number(review.rating),
+                          0
+                      ) / reviewCount
+                  ).toFixed(1)
+              )
+            : 0;
+    // CALCULATE FINAL PRICE
+    const price = Number(product.price);
+    const discount = Number(
+        product.discount || 0
+    );
+    const finalPrice = Number(
+        (
+            price -
+            (price * discount) / 100
+        ).toFixed(2)
+    );
+    // CALCULATE STOCK
+    let totalStock = 0;
+    if (product.variants?.length > 0) {
+        totalStock = product.variants.reduce(
+            (total, variant) => {
+                const inventory =
+                    variant.inventory;
+                if (!inventory) {
+                    return total;
+                }
+                const availableStock =
+                    Number(
+                        inventory.quantity || 0
+                    ) -
+                    Number(
+                        inventory.reservedQuantity ||
+                            0
+                    );
+                return (
+                    total +
+                    Math.max(
+                        availableStock,
+                        0
+                    )
+                );
+            },
+            0
+        );
+    }
+
+    // RETURN PRODUCT DETAILS
+    return {
+        ...product.toJSON(),
+        price,
+        discount,
+        finalPrice,
+        stock: totalStock,
+        rating: averageRating,
+        reviewCount,
+        reviews,
+    };
 };
 
 // CREATE PRODUCT
