@@ -212,16 +212,16 @@ OrderItem.belongsTo(ProductVariant, {
     as: "variant",
 });
 
-// USER ↔ PAYMENT METHOD
-User.hasMany(PaymentMethod, {
-    foreignKey: "userId",
-    as: "paymentMethods",
-});
+// // USER ↔ PAYMENT METHOD
+// User.hasMany(PaymentMethod, {
+//     foreignKey: "userId",
+//     as: "paymentMethods",
+// });
 
-PaymentMethod.belongsTo(User, {
-    foreignKey: "userId",
-    as: "user",
-});
+// PaymentMethod.belongsTo(User, {
+//     foreignKey: "userId",
+//     as: "user",
+// });
 
 // USER ↔ PAYMENT
 User.hasMany(Payment, {

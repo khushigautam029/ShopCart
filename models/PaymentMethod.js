@@ -10,62 +10,38 @@ const PaymentMethod = sequelize.define(
             autoIncrement: true,
         },
 
-        userId: {
-            type: DataTypes.INTEGER,
+        name: {
+            type: DataTypes.STRING(50),
             allowNull: false,
-            field: "user_id",
+        },
+
+        code: {
+            type: DataTypes.STRING(30),
+            allowNull: false,
+            unique: true,
         },
 
         type: {
-            type: DataTypes.ENUM("CARD"),
+            type: DataTypes.ENUM(
+                "CASH",
+                "ONLINE",
+                "CARD"
+            ),
             allowNull: false,
         },
 
-        provider: {
-            type: DataTypes.STRING(50),
-            allowNull: false,
-        },
-
-        providerPaymentMethodId: {
-            type: DataTypes.STRING(255),
-            allowNull: false,
-            unique: true,
-            field: "provider_payment_method_id",
-        },
-
-        last4: {
-            type: DataTypes.STRING(4),
-            allowNull: true,
-        },
-
-        cardBrand: {
-            type: DataTypes.STRING(50),
-            allowNull: true,
-            field: "card_brand",
-        },
-
-        isDefault: {
+        isActive: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
-            defaultValue: false,
-            field: "is_default",
-        },
-
-        createdAt: {
-            type: DataTypes.DATE,
-            allowNull: false,
-            field: "created_at",
-        },
-
-        updatedAt: {
-            type: DataTypes.DATE,
-            allowNull: false,
-            field: "updated_at",
+            defaultValue: true,
+            field: "is_active",
         },
     },
     {
         tableName: "payment_methods",
         timestamps: true,
+        createdAt: "created_at",
+        updatedAt: "updated_at",
     }
 );
 
