@@ -10,9 +10,9 @@ export const loginWithPhone = async (phone) => {
         },
     });
     if (user) {
-        if (user.role === "SELLER") {
+        if (user.role !== "CUSTOMER") {
             throw new Error(
-                "This phone number belongs to a seller account. Please use seller login."
+                "This phone number is not registered as a customer account."
             );
         }
         if (user.status === "BLOCKED") {

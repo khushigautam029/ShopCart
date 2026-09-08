@@ -1,5 +1,8 @@
 import {
+    Order,
+    OrderItem,
     Product,
+    ProductVariant,
     Review,
     User,
 } from "../models/index.js";
@@ -9,26 +12,64 @@ export const createReview = async (
     productId,
     data
 ) => {
+    // 1. Check product exists and is active
     const product = await Product.findOne({
         where: {
             id: productId,
             status: "ACTIVE",
         },
     });
+
     if (!product) {
         throw new Error("Product not found");
     }
+
+    // 2. Check customer has purchased and received this product
+    const deliveredOrder = await Order.findOne({
+        where: {
+            userId,
+            status: "DELIVERED",
+        },
+        include: [
+            {
+                model: OrderItem,
+                as: "items",
+                required: true,
+                include: [
+                    {
+                        model: ProductVariant,
+                        as: "variant",
+                        required: true,
+                        where: {
+                            productId,
+                        },
+                    },
+                ],
+            },
+        ],
+    });
+
+    if (!deliveredOrder) {
+        throw new Error(
+            "You can review only products you have purchased and received"
+        );
+    }
+
+    // 3. Prevent duplicate review
     const existingReview = await Review.findOne({
         where: {
             userId,
             productId,
         },
     });
+
     if (existingReview) {
         throw new Error(
             "You have already reviewed this product"
         );
     }
+
+    // 4. Create review
     const review = await Review.create({
         userId,
         productId,
@@ -36,9 +77,10 @@ export const createReview = async (
         comment: data.comment ?? null,
         status: "PUBLISHED",
     });
+
+    // 5. Return created review with user/product details
     return await getReviewById(review.id);
 };
-
 
 export const getProductReviews = async (
     productId
@@ -49,9 +91,11 @@ export const getProductReviews = async (
             status: "ACTIVE",
         },
     });
+
     if (!product) {
         throw new Error("Product not found");
     }
+
     return await Review.findAll({
         where: {
             productId,
@@ -87,12 +131,13 @@ export const getReviewById = async (reviewId) => {
             },
         ],
     });
+
     if (!review) {
         throw new Error("Review not found");
     }
+
     return review;
 };
-
 
 export const updateReview = async (
     reviewId,
@@ -105,11 +150,13 @@ export const updateReview = async (
             userId,
         },
     });
+
     if (!review) {
         throw new Error(
             "Review not found or you are not authorized"
         );
     }
+
     await review.update({
         ...(data.rating !== undefined && {
             rating: data.rating,
@@ -118,6 +165,7 @@ export const updateReview = async (
             comment: data.comment,
         }),
     });
+
     return await getReviewById(reviewId);
 };
 
@@ -131,11 +179,14 @@ export const deleteReview = async (
             userId,
         },
     });
+
     if (!review) {
         throw new Error(
             "Review not found or you are not authorized"
         );
     }
+
     await review.destroy();
+
     return true;
 };

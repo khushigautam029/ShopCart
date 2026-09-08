@@ -48,28 +48,24 @@ export const createOrder = async (
             },
             transaction,
         });
-
         if (!address) {
             throw new AppError(
                 "Address not found",
                 STATUS_CODES.NOT_FOUND
             );
         }
-
         const cart = await Cart.findOne({
             where: {
                 userId,
             },
             transaction,
         });
-
         if (!cart) {
             throw new AppError(
                 "Cart is empty",
                 STATUS_CODES.BAD_REQUEST
             );
         }
-
         const cartItems = await CartItem.findAll({
             where: {
                 cartId: cart.id,
@@ -93,22 +89,18 @@ export const createOrder = async (
             transaction,
             lock: transaction.LOCK.UPDATE,
         });
-
         if (cartItems.length === 0) {
             throw new AppError(
                 "Cart is empty",
                 STATUS_CODES.BAD_REQUEST
             );
         }
-
         let subtotal = 0;
         const orderItems = [];
-
         for (const cartItem of cartItems) {
             const variant = cartItem.variant;
             const product = variant?.product;
             const inventory = variant?.inventory;
-
             // Variant check
             if (
                 !variant ||
@@ -119,7 +111,6 @@ export const createOrder = async (
                     STATUS_CODES.CONFLICT
                 );
             }
-
             // Product check
             if (
                 !product ||
@@ -130,30 +121,24 @@ export const createOrder = async (
                     STATUS_CODES.CONFLICT
                 );
             }
-
             // Inventory check
             const availableStock = inventory
                 ? inventory.quantity -
-                  inventory.reservedQuantity
+                inventory.reservedQuantity
                 : 0;
-
             if (cartItem.quantity > availableStock) {
                 throw new AppError(
                     `Only ${availableStock} item(s) of "${product.name}" are available`,
                     STATUS_CODES.CONFLICT
                 );
             }
-
             // Price
             const unitPrice = Number(
                 variant.price ?? product.price
             );
-
             const itemSubtotal =
                 unitPrice * cartItem.quantity;
-
             subtotal += itemSubtotal;
-
             // Order item snapshot
             orderItems.push({
                 variantId: variant.id,
@@ -164,18 +149,14 @@ export const createOrder = async (
                 subtotal: itemSubtotal,
             });
         }
-
         const shippingFee = subtotal >= 999
             ? 0
             : 50;
-
         const discount = 0;
-
         const totalAmount =
             subtotal -
             discount +
             shippingFee;
-
         const order = await Order.create(
             {
                 userId,
@@ -196,7 +177,6 @@ export const createOrder = async (
                 transaction,
             }
         );
-
         // Create order items
         for (const item of orderItems) {
             await OrderItem.create(
@@ -236,7 +216,6 @@ export const createOrder = async (
         for (const cartItem of cartItems) {
             const inventory =
                 cartItem.variant.inventory;
-
             inventory.reservedQuantity +=
                 cartItem.quantity;
 
@@ -280,7 +259,6 @@ export const updateOrderStatus = async (
     note = null
 ) => {
     const transaction = await sequelize.transaction();
-
     try {
         const order = await Order.findByPk(
             orderId,
@@ -307,14 +285,12 @@ export const updateOrderStatus = async (
                 lock: transaction.LOCK.UPDATE,
             }
         );
-
         if (!order) {
             throw new AppError(
                 "Order not found",
                 STATUS_CODES.NOT_FOUND
             );
         }
-
         if (!order.items || order.items.length === 0) {
             throw new AppError(
                 "Order has no items",
@@ -336,12 +312,9 @@ export const updateOrderStatus = async (
                 STATUS_CODES.FORBIDDEN
             );
         }
-
         const currentStatus = order.status;
-
         const possibleStatuses =
             allowedTransitions[currentStatus] || [];
-
         if (
             !possibleStatuses.includes(newStatus)
         ) {
@@ -350,14 +323,11 @@ export const updateOrderStatus = async (
                 STATUS_CODES.CONFLICT
             );
         }
-
         // Update current order status
         order.status = newStatus;
-
         await order.save({
             transaction,
         });
-
         // Add status history
         await OrderStatusHistory.create(
             {
@@ -372,9 +342,7 @@ export const updateOrderStatus = async (
                 transaction,
             }
         );
-
         await transaction.commit();
-
         return {
             orderId: order.id,
             orderNumber: order.orderNumber,

@@ -24,8 +24,7 @@ export const createCustomerAddress = asyncHandler(async (req, res) => {
 });
 
 export const getCustomerAddresses = asyncHandler(async (req, res) => {
-    const addresses =
-        await getAddresses(req.user.id);
+    const addresses = await getAddresses(req.user.id);
     return sendSuccess(
         res,
         STATUS_CODES.OK,
@@ -35,11 +34,10 @@ export const getCustomerAddresses = asyncHandler(async (req, res) => {
 });
 
 export const getCustomerAddress = asyncHandler(async (req, res) => {
-    const address =
-        await getAddressById(
+    const address = await getAddressById(
             req.user.id,
             req.params.id
-        );
+    );
     if (!address) {
         return sendError(
             res,

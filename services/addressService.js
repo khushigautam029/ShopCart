@@ -11,7 +11,6 @@ const setDefaultAddress = async (userId, addressId) => {
             },
         }
     );
-
     await Address.update(
         {
             isDefault: true,
@@ -33,14 +32,12 @@ export const createAddress = async (
         userId,
         ...data,
     });
-
     if (data.isDefault === true) {
         await setDefaultAddress(
             userId,
             address.id
         );
     }
-
     return address;
 };
 
@@ -79,20 +76,16 @@ export const updateAddress = async (
             userId,
         },
     });
-
     if (!address) {
         throw new Error("Address not found");
     }
-
     await address.update(data);
-
     if (data.isDefault === true) {
         await setDefaultAddress(
             userId,
             address.id
         );
     }
-
     return address;
 };
 
@@ -106,13 +99,10 @@ export const deleteAddress = async (
             userId,
         },
     });
-
     if (!address) {
         throw new Error("Address not found");
     }
-
     await address.destroy();
-
     return true;
 };
 
@@ -126,15 +116,12 @@ export const makeDefaultAddress = async (
             userId,
         },
     });
-
     if (!address) {
         throw new Error("Address not found");
     }
-
     await setDefaultAddress(
         userId,
         addressId
     );
-
     return await Address.findByPk(addressId);
 };
