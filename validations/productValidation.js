@@ -164,11 +164,11 @@ export const updateProductSchema = joi
             .string()
             .trim()
             .allow("")
-            .max(5000)
+            .max(500)
             .optional()
             .messages({
                 "string.max":
-                    "Product description must not exceed 5000 characters",
+                    "Product description must not exceed 500 characters",
             }),
 
         brand: joi

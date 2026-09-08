@@ -1,77 +1,42 @@
 import PaymentMethod from "../models/PaymentMethod.js";
+import AppError from "../utils/AppError.js";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
-export const getPaymentMethods = async (userId) => {
+export const getPaymentMethods = async () => {
     return await PaymentMethod.findAll({
         where: {
-            userId,
+            isActive: true,
         },
         attributes: [
             "id",
+            "name",
+            "code",
             "type",
-            "provider",
-            "last4",
-            "cardBrand",
-            "isDefault",
-            "createdAt",
+            "isActive",
         ],
-        order: [["createdAt", "DESC"]],
+        order: [["id", "ASC"]],
     });
 };
 
-export const addPaymentMethod = async (userId, data) => {
-    const paymentMethod = await PaymentMethod.create({
-        userId,
-        type: data.type,
-        provider: data.provider,
-        providerPaymentMethodId: data.providerPaymentMethodId,
-    });
-
-    return paymentMethod;
-};
-
-export const deletePaymentMethod = async (userId, paymentMethodId) => {
+export const getPaymentMethodById = async (paymentMethodId) => {
     const paymentMethod = await PaymentMethod.findOne({
         where: {
             id: paymentMethodId,
-            userId,
+            isActive: true,
         },
+        attributes: [
+            "id",
+            "name",
+            "code",
+            "type",
+            "isActive",
+        ],
     });
-
     if (!paymentMethod) {
-        throw new Error("Payment method not found");
+        throw new AppError(
+            "Payment method not found or inactive",
+            STATUS_CODES.NOT_FOUND
+        );
     }
-
-    await paymentMethod.destroy();
-};
-
-export const setDefaultPaymentMethod = async (
-    userId,
-    paymentMethodId
-) => {
-    const paymentMethod = await PaymentMethod.findOne({
-        where: {
-            id: paymentMethodId,
-            userId,
-        },
-    });
-
-    if (!paymentMethod) {
-        throw new Error("Payment method not found");
-    }
-
-    await PaymentMethod.update(
-        {
-            isDefault: false,
-        },
-        {
-            where: {
-                userId,
-            },
-        }
-    );
-
-    paymentMethod.isDefault = true;
-    await paymentMethod.save();
-
     return paymentMethod;
 };

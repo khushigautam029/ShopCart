@@ -102,11 +102,9 @@ export const getProductReviews = async (
             status: "ACTIVE",
         },
     });
-
     if (!product) {
         throw new Error("Product not found");
     }
-
     return await Review.findAll({
         where: {
             productId,
@@ -142,11 +140,9 @@ export const getReviewById = async (reviewId) => {
             },
         ],
     });
-
     if (!review) {
         throw new Error("Review not found");
     }
-
     return review;
 };
 
@@ -161,13 +157,11 @@ export const updateReview = async (
             userId,
         },
     });
-
     if (!review) {
         throw new Error(
             "Review not found or you are not authorized"
         );
     }
-
     await review.update({
         ...(data.rating !== undefined && {
             rating: data.rating,
@@ -176,7 +170,6 @@ export const updateReview = async (
             comment: data.comment,
         }),
     });
-
     return await getReviewById(reviewId);
 };
 
@@ -190,14 +183,11 @@ export const deleteReview = async (
             userId,
         },
     });
-
     if (!review) {
         throw new Error(
             "Review not found or you are not authorized"
         );
     }
-
     await review.destroy();
-
     return true;
 };

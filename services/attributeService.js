@@ -6,11 +6,9 @@ export const createAttribute = async (data) => {
             name: data.name,
         },
     });
-
     if (existingAttribute) {
         throw new Error("Attribute already exists");
     }
-
     return await Attribute.create({
         name: data.name,
     });
@@ -24,37 +22,30 @@ export const getAllAttributes = async () => {
 
 export const getAttributeById = async (id) => {
     const attribute = await Attribute.findByPk(id);
-
     if (!attribute) {
         throw new Error("Attribute not found");
     }
-
     return attribute;
 };
 
 export const updateAttribute = async (id, data) => {
     const attribute = await Attribute.findByPk(id);
-
     if (!attribute) {
         throw new Error("Attribute not found");
     }
-
     if (data.name !== attribute.name) {
         const existingAttribute = await Attribute.findOne({
             where: {
                 name: data.name,
             },
         });
-
         if (existingAttribute) {
             throw new Error("Attribute already exists");
         }
     }
-
     await attribute.update({
         name: data.name,
     });
-
     return attribute;
 };
 
