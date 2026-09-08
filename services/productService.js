@@ -10,38 +10,23 @@ import {
     VariantAttribute,
 } from "../models/index.js";
 
-export const createProduct = async (sellerId, data) => {
-    const category = await Category.findByPk(data.categoryId);
-    if (!category) {
-        throw new Error("Category not found");
-    }
-    if (category.status !== "ACTIVE") {
-        throw new Error("Selected category is inactive");
-    }
-    const product = await Product.create({
-        sellerId,
-        categoryId: data.categoryId,
-        name: data.name,
-        description: data.description,
-        price: data.price,
-    });
-    return product;
-};
-
+// GET ALL PRODUCTS
 export const getAllProducts = async (filters = {}) => {
     const {
         search,
         categoryId,
+        brand,
+        gender,
+        discount,
+        deliveryTime,
         minPrice,
         maxPrice,
         sortBy = "created_at",
         order = "DESC",
     } = filters;
-
     const where = {
         status: "ACTIVE",
     };
-
     // SEARCH
     if (search && search.trim() !== "") {
         where[Op.or] = [
@@ -55,25 +40,60 @@ export const getAllProducts = async (filters = {}) => {
                     [Op.like]: `%${search.trim()}%`,
                 },
             },
+            {
+                brand: {
+                    [Op.like]: `%${search.trim()}%`,
+                },
+            },
         ];
     }
-
     // CATEGORY
-    if (categoryId) {
+    if (
+        categoryId !== undefined &&
+        categoryId !== "" &&
+        !isNaN(Number(categoryId))
+    ) {
         where.categoryId = Number(categoryId);
     }
-
+    // BRAND
+    if (brand && brand.trim() !== "") {
+        where.brand = {
+            [Op.like]: `%${brand.trim()}%`,
+        };
+    }
+    // GENDER
+    if (gender && gender.trim() !== "") {
+        where.gender = gender.trim().toUpperCase();
+    }
+    // DISCOUNT
+    const hasDiscount =
+        discount !== undefined &&
+        discount !== "" &&
+        !isNaN(Number(discount));
+    if (hasDiscount) {
+        where.discount = {
+            [Op.gte]: Number(discount),
+        };
+    }
+    // DELIVERY TIME
+    const hasDeliveryTime =
+        deliveryTime !== undefined &&
+        deliveryTime !== "" &&
+        !isNaN(Number(deliveryTime));
+    if (hasDeliveryTime) {
+        where.deliveryTime = {
+            [Op.lte]: Number(deliveryTime),
+        };
+    }
     // PRICE
     const hasMinPrice =
         minPrice !== undefined &&
         minPrice !== "" &&
         !isNaN(Number(minPrice));
-
     const hasMaxPrice =
         maxPrice !== undefined &&
         maxPrice !== "" &&
         !isNaN(Number(maxPrice));
-
     if (hasMinPrice || hasMaxPrice) {
         where.price = {};
 
@@ -85,26 +105,23 @@ export const getAllProducts = async (filters = {}) => {
             where.price[Op.lte] = Number(maxPrice);
         }
     }
-
     // SORT
     const allowedSortFields = [
         "price",
         "created_at",
         "name",
+        "discount",
+        "delivery_time",
     ];
-
     const finalSortBy = allowedSortFields.includes(sortBy)
         ? sortBy
         : "created_at";
-
     const finalOrder =
         String(order).toUpperCase() === "ASC"
             ? "ASC"
             : "DESC";
-
     return await Product.findAll({
         where,
-
         include: [
             {
                 model: Category,
@@ -122,13 +139,13 @@ export const getAllProducts = async (filters = {}) => {
                 ],
             },
         ],
-
         order: [
             [finalSortBy, finalOrder],
         ],
     });
 };
 
+// GET PRODUCT BY ID
 export const getProductById = async (id) => {
     const product = await Product.findOne({
         where: {
@@ -164,6 +181,7 @@ export const getProductById = async (id) => {
                     "price",
                     "status",
                 ],
+
                 include: [
                     {
                         model: VariantAttribute,
@@ -173,12 +191,18 @@ export const getProductById = async (id) => {
                             {
                                 model: AttributeValue,
                                 as: "attributeValue",
-                                attributes: ["id", "value"],
+                                attributes: [
+                                    "id",
+                                    "value",
+                                ],
                                 include: [
                                     {
                                         model: Attribute,
                                         as: "attribute",
-                                        attributes: ["id", "name"],
+                                        attributes: [
+                                            "id",
+                                            "name",
+                                        ],
                                     },
                                 ],
                             },
@@ -202,6 +226,39 @@ export const getProductById = async (id) => {
     return product;
 };
 
+// CREATE PRODUCT
+export const createProduct = async (
+    sellerId,
+    data
+) => {
+    // Check category
+    const category = await Category.findByPk(
+        data.categoryId
+    );
+    if (!category) {
+        throw new Error("Category not found");
+    }
+    if (category.status !== "ACTIVE") {
+        throw new Error(
+            "Selected category is inactive"
+        );
+    }
+    // Create product
+    const product = await Product.create({
+        sellerId,
+        categoryId: data.categoryId,
+        name: data.name,
+        description: data.description,
+        brand: data.brand,
+        gender: data.gender,
+        price: data.price,
+        discount: data.discount ?? 0,
+        deliveryTime: data.deliveryTime,
+    });
+    return product;
+};
+
+// UPDATE PRODUCT
 export const updateProduct = async (
     productId,
     sellerId,
@@ -218,21 +275,59 @@ export const updateProduct = async (
             "Product not found or you are not authorized to update it"
         );
     }
-    if (data.categoryId) {
+    // Check category if category is being changed
+    if (
+        data.categoryId !== undefined &&
+        data.categoryId !== ""
+    ) {
         const category = await Category.findByPk(
             data.categoryId
         );
         if (!category) {
-            throw new Error("Category not found");
+            throw new Error(
+                "Category not found"
+            );
         }
         if (category.status !== "ACTIVE") {
-            throw new Error("Selected category is inactive");
+            throw new Error(
+                "Selected category is inactive"
+            );
         }
     }
-    await product.update(data);
+    // Update product
+    await product.update({
+        ...(data.categoryId !== undefined && {
+            categoryId: data.categoryId,
+        }),
+        ...(data.name !== undefined && {
+            name: data.name,
+        }),
+        ...(data.description !== undefined && {
+            description: data.description,
+        }),
+        ...(data.brand !== undefined && {
+            brand: data.brand,
+        }),
+        ...(data.gender !== undefined && {
+            gender: data.gender,
+        }),
+        ...(data.price !== undefined && {
+            price: data.price,
+        }),
+        ...(data.discount !== undefined && {
+            discount: data.discount,
+        }),
+        ...(data.deliveryTime !== undefined && {
+            deliveryTime: data.deliveryTime,
+        }),
+        ...(data.status !== undefined && {
+            status: data.status,
+        }),
+    });
     return product;
 };
 
+// DELETE PRODUCT
 export const deleteProduct = async (
     productId,
     sellerId

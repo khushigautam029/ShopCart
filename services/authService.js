@@ -10,14 +10,15 @@ export const loginWithPhone = async (phone) => {
         },
     });
     if (user) {
-        if (user.role !== "CUSTOMER") {
+        if (user.role === "SELLER") {
             throw new Error(
-                "This phone number is not registered as a customer account."
+                "This phone number belongs to a seller account. Please use seller login."
             );
         }
         if (user.status === "BLOCKED") {
             throw new Error("Your account has been blocked");
         }
+        
         if (user.status === "INACTIVE") {
             throw new Error("Your account is inactive");
         }

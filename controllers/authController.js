@@ -48,7 +48,6 @@ export const verifyOtp = async (req, res) => {
     }
 };
 
-
 export const sellerLogin = async (req, res) => {
     try {
         const result = await loginSellerWithPhone(

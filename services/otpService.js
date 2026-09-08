@@ -11,7 +11,6 @@ export const createAndSendOtp = async (phone) => {
         otp,
         expiresAt,
     });
-
     return {
         phone,
         expiresAt,
