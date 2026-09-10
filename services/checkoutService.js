@@ -5,15 +5,19 @@ import CartItem from "../models/CartItem.js";
 import Inventory from "../models/Inventory.js";
 import Order from "../models/Order.js";
 import OrderItem from "../models/OrderItem.js";
-import Payment from "../models/Payment.js";
-import PaymentMethod from "../models/PaymentMethod.js";
+import OrderStatusHistory from "../models/OrderStatusHistory.js";
 import Product from "../models/Product.js";
 import ProductVariant from "../models/ProductVariant.js";
+import AppError from "../utils/AppError.js";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
 export const checkout = async (userId, data) => {
     const transaction = await sequelize.transaction();
+
     try {
-        const { addressId, paymentMethodId } = data;
+        const { addressId } = data;
+
+        // 1. Check address
         const address = await Address.findOne({
             where: {
                 id: addressId,
@@ -21,28 +25,30 @@ export const checkout = async (userId, data) => {
             },
             transaction,
         });
+
         if (!address) {
-            throw new Error("Address not found");
+            throw new AppError(
+                "Address not found",
+                STATUS_CODES.NOT_FOUND
+            );
         }
-        const paymentMethod = await PaymentMethod.findOne({
-            where: {
-                id: paymentMethodId,
-                userId,
-            },
-            transaction,
-        });
-        if (!paymentMethod) {
-            throw new Error("Payment method not found");
-        }
+
+        // 2. Check cart
         const cart = await Cart.findOne({
             where: {
                 userId,
             },
             transaction,
         });
+
         if (!cart) {
-            throw new Error("Cart not found");
+            throw new AppError(
+                "Cart not found",
+                STATUS_CODES.NOT_FOUND
+            );
         }
+
+        // 3. Get cart items with product, variant and inventory
         const cartItems = await CartItem.findAll({
             where: {
                 cartId: cart.id,
@@ -72,58 +78,88 @@ export const checkout = async (userId, data) => {
             transaction,
             lock: transaction.LOCK.UPDATE,
         });
+
         if (cartItems.length === 0) {
-            throw new Error("Cart is empty");
+            throw new AppError(
+                "Cart is empty",
+                STATUS_CODES.BAD_REQUEST
+            );
         }
+
+        // 4. Calculate subtotal and prepare order items
         let subtotal = 0;
         const orderItemsData = [];
+
         for (const cartItem of cartItems) {
             const variant = cartItem.variant;
+
             if (!variant) {
-                throw new Error(
-                    `Product variant not found for cart item ${cartItem.id}`
+                throw new AppError(
+                    `Product variant not found for cart item ${cartItem.id}`,
+                    STATUS_CODES.NOT_FOUND
                 );
             }
+
             const product = variant.product;
+
             if (!product) {
-                throw new Error(
-                    `Product not found for variant ${variant.id}`
+                throw new AppError(
+                    `Product not found for variant ${variant.id}`,
+                    STATUS_CODES.NOT_FOUND
                 );
             }
-            // Product status uses lowercase in your current model
+
+            // Product status
             if (product.status !== "ACTIVE") {
-                throw new Error(
-                    `Product "${product.name}" is inactive`
+                throw new AppError(
+                    `Product "${product.name}" is inactive`,
+                    STATUS_CODES.BAD_REQUEST
                 );
             }
-            // Variant status uses uppercase
+
+            // Variant status
             if (variant.status !== "ACTIVE") {
-                throw new Error(
-                    `Product variant "${variant.sku}" is inactive`
+                throw new AppError(
+                    `Product variant "${variant.sku}" is inactive`,
+                    STATUS_CODES.BAD_REQUEST
                 );
             }
+
+            // Variant price
             if (!variant.price) {
-                throw new Error(
-                    `Price not available for variant "${variant.sku}"`
+                throw new AppError(
+                    `Price not available for variant "${variant.sku}"`,
+                    STATUS_CODES.BAD_REQUEST
                 );
             }
+
             const inventory = variant.inventory;
+
             if (!inventory) {
-                throw new Error(
-                    `Inventory not found for variant "${variant.sku}"`
+                throw new AppError(
+                    `Inventory not found for variant "${variant.sku}"`,
+                    STATUS_CODES.NOT_FOUND
                 );
             }
+
+            // Available stock = actual quantity - already reserved
             const availableQuantity =
-                inventory.quantity - inventory.reservedQuantity;
-            if (availableQuantity < cartItem.quantity) {
-                throw new Error(
-                    `Insufficient stock for "${product.name}". Available: ${availableQuantity}`
+                Number(inventory.quantity) -
+                Number(inventory.reservedQuantity);
+
+            if (availableQuantity < Number(cartItem.quantity)) {
+                throw new AppError(
+                    `Insufficient stock for "${product.name}". Available: ${availableQuantity}`,
+                    STATUS_CODES.BAD_REQUEST
                 );
             }
+
             const unitPrice = Number(variant.price);
             const quantity = Number(cartItem.quantity);
             const itemSubtotal = unitPrice * quantity;
+
             subtotal += itemSubtotal;
+
             orderItemsData.push({
                 variantId: variant.id,
                 productName: product.name,
@@ -133,13 +169,22 @@ export const checkout = async (userId, data) => {
                 subtotal: itemSubtotal,
             });
         }
+
+        // 5. Calculate totals
         const discount = 0;
-        // For now we are keeping shipping free.
-        // We can implement shipping rules later.
+
+        // Free shipping for now
         const shippingFee = 0;
+
         const totalAmount =
             subtotal - discount + shippingFee;
+
+        // 6. Generate order number
         const orderNumber = `ORD-${Date.now()}-${userId}`;
+
+        // 7. Create order
+        // Payment is NOT created here.
+        // Order remains PENDING until payment succeeds.
         const order = await Order.create(
             {
                 userId,
@@ -156,56 +201,56 @@ export const checkout = async (userId, data) => {
                 transaction,
             }
         );
+
+        // 8. Create order items
         const orderItems = orderItemsData.map((item) => ({
             orderId: order.id,
             ...item,
         }));
+
         await OrderItem.bulkCreate(orderItems, {
             transaction,
         });
-        const payment = await Payment.create(
+
+        // 9. Reserve inventory
+        for (const cartItem of cartItems) {
+            const inventory = cartItem.variant.inventory;
+
+            inventory.reservedQuantity =
+                Number(inventory.reservedQuantity) +
+                Number(cartItem.quantity);
+
+            await inventory.save({
+                transaction,
+            });
+        }
+
+        // 10. Add initial order history
+        await OrderStatusHistory.create(
             {
                 orderId: order.id,
-                userId,
-                paymentMethodId,
-                provider: paymentMethod.provider,
-                amount: totalAmount,
-                currency: "INR",
                 status: "PENDING",
+                note: "Order placed and awaiting payment",
+                changedBy: userId,
             },
             {
                 transaction,
             }
         );
-        payment.status = "PAID";
-        payment.paidAt = new Date();
-        await payment.save({
-            transaction,
-        });
-        order.paymentStatus = "PAID";
-        order.status = "CONFIRMED";
-        await order.save({
-            transaction,
-        });
-        for (const cartItem of cartItems) {
-            const inventory = cartItem.variant.inventory;
-            inventory.quantity =
-                inventory.quantity - cartItem.quantity;
-            await inventory.save({
-                transaction,
-            });
-        }
+
+        // 11. Clear cart
         await CartItem.destroy({
             where: {
                 cartId: cart.id,
             },
             transaction,
         });
+
         await transaction.commit();
+
         return {
             order,
             orderItems,
-            payment,
         };
     } catch (error) {
         await transaction.rollback();

@@ -19,6 +19,7 @@ export const getAllProducts = async (filters = {}) => {
         categoryId,
         brand,
         gender,
+        size, // ADD THIS
         discount,
         deliveryTime,
         minPrice,
@@ -130,6 +131,7 @@ export const getAllProducts = async (filters = {}) => {
                 as: "category",
                 attributes: ["id", "name"],
             },
+
             {
                 model: ProductImage,
                 as: "images",
@@ -140,6 +142,45 @@ export const getAllProducts = async (filters = {}) => {
                     "sortOrder",
                 ],
             },
+            // ADD THIS
+            {
+                model: ProductVariant,
+                as: "variants",
+                where: {
+                    status: "ACTIVE",
+                },
+                required: !!size,
+                include: [
+                    {
+                        model: VariantAttribute,
+                        as: "variantAttributes",
+                        required: !!size,
+                        include: [
+                            {
+                                model: AttributeValue,
+                                as: "attributeValue",
+                                required: !!size,
+                                where: size
+                                    ? {
+                                        value: size.trim(),
+                                    }
+                                    : undefined,
+                                include: [
+                                    {
+                                        model: Attribute,
+                                        as: "attribute",
+                                        where: size
+                                            ? {
+                                                name: "Size",
+                                            }
+                                            : undefined,
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
         ],
         order: [
             [finalSortBy, finalOrder],
@@ -148,6 +189,7 @@ export const getAllProducts = async (filters = {}) => {
 };
 
 // GET PRODUCT BY ID
+
 export const getProductById = async (id) => {
     const product = await Product.findOne({
         where: {
@@ -269,15 +311,15 @@ export const getProductById = async (id) => {
     const averageRating =
         reviewCount > 0
             ? Number(
-                  (
-                      reviews.reduce(
-                          (sum, review) =>
-                              sum +
-                              Number(review.rating),
-                          0
-                      ) / reviewCount
-                  ).toFixed(1)
-              )
+                (
+                    reviews.reduce(
+                        (sum, review) =>
+                            sum +
+                            Number(review.rating),
+                        0
+                    ) / reviewCount
+                ).toFixed(1)
+            )
             : 0;
     // CALCULATE FINAL PRICE
     const price = Number(product.price);
@@ -306,7 +348,7 @@ export const getProductById = async (id) => {
                     ) -
                     Number(
                         inventory.reservedQuantity ||
-                            0
+                        0
                     );
                 return (
                     total +

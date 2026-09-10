@@ -1,8 +1,6 @@
 import sequelize from "../config/database.js";
 import {
     Address,
-    Cart,
-    CartItem,
     Inventory,
     Order,
     OrderItem,
@@ -13,72 +11,211 @@ import {
 import AppError from "../utils/AppError.js";
 import { STATUS_CODES } from "../utils/setConstants.js";
 
-const generateOrderNumber = () => {
-    const timestamp = Date.now();
-    const random = Math.floor(
-        1000 + Math.random() * 9000
-    );
-    return `SC-${timestamp}-${random}`;
-};
-// Allowed order status transitions
+
+// Allowed seller order status transitions
 const allowedTransitions = {
-    PENDING: ["CONFIRMED", "CANCELLED"],
-    CONFIRMED: ["PACKED", "CANCELLED"],
-    PACKED: ["SHIPPED", "CANCELLED"],
+    CONFIRMED: ["PACKED"],
+    PACKED: ["SHIPPED"],
     SHIPPED: ["OUT_FOR_DELIVERY"],
     OUT_FOR_DELIVERY: ["DELIVERED"],
     DELIVERED: [],
     CANCELLED: [],
 };
 
-export const createOrder = async (
+
+// =====================================================
+// CUSTOMER - GET ALL ORDERS
+// =====================================================
+
+export const getMyOrders = async (userId) => {
+    return await Order.findAll({
+        where: {
+            userId,
+        },
+        include: [
+            {
+                model: OrderItem,
+                as: "items",
+                include: [
+                    {
+                        model: ProductVariant,
+                        as: "variant",
+                        include: [
+                            {
+                                model: Product,
+                                as: "product",
+                                attributes: [
+                                    "id",
+                                    "name",
+                                    "status",
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+        order: [
+            ["created_at", "DESC"],
+        ],
+    });
+};
+
+
+// =====================================================
+// CUSTOMER - GET ORDER DETAILS
+// =====================================================
+
+export const getOrderDetails = async (
     userId,
-    addressId,
-    paymentMethod
+    orderId
 ) => {
-    const transaction = await sequelize.transaction();
+    const order = await Order.findOne({
+        where: {
+            id: orderId,
+            userId,
+        },
+        include: [
+            {
+                model: Address,
+                as: "address",
+            },
+            {
+                model: OrderItem,
+                as: "items",
+                include: [
+                    {
+                        model: ProductVariant,
+                        as: "variant",
+                        include: [
+                            {
+                                model: Product,
+                                as: "product",
+                                attributes: [
+                                    "id",
+                                    "name",
+                                    "status",
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                model: OrderStatusHistory,
+                as: "statusHistory",
+                attributes: [
+                    "id",
+                    "orderId",
+                    "status",
+                    "note",
+                    "changedBy",
+                    "created_at",
+                ],
+                order: [
+                    ["created_at", "ASC"],
+                ],
+            },
+        ],
+    });
+
+    if (!order) {
+        throw new AppError(
+            "Order not found",
+            STATUS_CODES.NOT_FOUND
+        );
+    }
+
+    return order;
+};
+
+
+// =====================================================
+// CUSTOMER - GET ORDER STATUS
+// =====================================================
+
+export const getOrderStatus = async (
+    userId,
+    orderId
+) => {
+    const order = await Order.findOne({
+        where: {
+            id: orderId,
+            userId,
+        },
+        attributes: [
+            "id",
+            "orderNumber",
+            "status",
+            "paymentStatus",
+            "created_at",
+            "updated_at",
+        ],
+    });
+
+    if (!order) {
+        throw new AppError(
+            "Order not found",
+            STATUS_CODES.NOT_FOUND
+        );
+    }
+
+    const statusHistory =
+        await OrderStatusHistory.findAll({
+            where: {
+                orderId: order.id,
+            },
+            attributes: [
+                "id",
+                "orderId",
+                "status",
+                "note",
+                "changedBy",
+                "created_at",
+            ],
+            order: [
+                ["created_at", "ASC"],
+            ],
+        });
+
+    return {
+        order,
+        statusHistory,
+    };
+};
+
+
+// =====================================================
+// CUSTOMER - CANCEL ORDER
+// =====================================================
+
+export const cancelOrder = async (
+    userId,
+    orderId
+) => {
+    const transaction =
+        await sequelize.transaction();
+
     try {
-        const address = await Address.findOne({
+        const order = await Order.findOne({
             where: {
-                id: addressId,
+                id: orderId,
                 userId,
-            },
-            transaction,
-        });
-        if (!address) {
-            throw new AppError(
-                "Address not found",
-                STATUS_CODES.NOT_FOUND
-            );
-        }
-        const cart = await Cart.findOne({
-            where: {
-                userId,
-            },
-            transaction,
-        });
-        if (!cart) {
-            throw new AppError(
-                "Cart is empty",
-                STATUS_CODES.BAD_REQUEST
-            );
-        }
-        const cartItems = await CartItem.findAll({
-            where: {
-                cartId: cart.id,
             },
             include: [
                 {
-                    model: ProductVariant,
-                    as: "variant",
+                    model: OrderItem,
+                    as: "items",
                     include: [
                         {
-                            model: Product,
-                            as: "product",
-                        },
-                        {
-                            model: Inventory,
-                            as: "inventory",
+                            model: ProductVariant,
+                            as: "variant",
+                            include: [
+                                {
+                                    model: Inventory,
+                                    as: "inventory",
+                                },
+                            ],
                         },
                     ],
                 },
@@ -86,121 +223,85 @@ export const createOrder = async (
             transaction,
             lock: transaction.LOCK.UPDATE,
         });
-        if (cartItems.length === 0) {
+
+        if (!order) {
             throw new AppError(
-                "Cart is empty",
+                "Order not found",
+                STATUS_CODES.NOT_FOUND
+            );
+        }
+
+        // Customer can cancel only before shipping
+        const cancellableStatuses = [
+            "PENDING",
+            "CONFIRMED",
+            "PACKED",
+        ];
+
+        if (
+            !cancellableStatuses.includes(
+                order.status
+            )
+        ) {
+            throw new AppError(
+                `Order cannot be cancelled when its status is ${order.status}`,
+                STATUS_CODES.CONFLICT
+            );
+        }
+
+        if (
+            !order.items ||
+            order.items.length === 0
+        ) {
+            throw new AppError(
+                "Order has no items",
                 STATUS_CODES.BAD_REQUEST
             );
         }
-        let subtotal = 0;
-        const orderItems = [];
-        for (const cartItem of cartItems) {
-            const variant = cartItem.variant;
-            const product = variant?.product;
-            const inventory = variant?.inventory;
-            // Variant check
-            if (
-                !variant ||
-                variant.status !== "ACTIVE"
-            ) {
-                throw new AppError(
-                    "One or more products in your cart are unavailable",
-                    STATUS_CODES.CONFLICT
-                );
-            }
-            // Product check
-            if (
-                !product ||
-                product.status !== "ACTIVE"
-            ) {
-                throw new AppError(
-                    `Product "${product?.name || "Unknown"}" is unavailable`,
-                    STATUS_CODES.CONFLICT
-                );
-            }
-            // Inventory check
-            const availableStock = inventory
-                ? inventory.quantity -
-                inventory.reservedQuantity
-                : 0;
-            if (cartItem.quantity > availableStock) {
-                throw new AppError(
-                    `Only ${availableStock} item(s) of "${product.name}" are available`,
-                    STATUS_CODES.CONFLICT
-                );
-            }
-            // Price
-            const unitPrice = Number(
-                variant.price ?? product.price
-            );
-            const itemSubtotal =
-                unitPrice * cartItem.quantity;
-            subtotal += itemSubtotal;
-            // Order item snapshot
-            orderItems.push({
-                variantId: variant.id,
-                productName: product.name,
-                sku: variant.sku,
-                quantity: cartItem.quantity,
-                unitPrice,
-                subtotal: itemSubtotal,
-            });
-        }
-        const shippingFee = subtotal >= 999
-            ? 0
-            : 50;
-        const discount = 0;
-        const totalAmount =
-            subtotal -
-            discount +
-            shippingFee;
-        const order = await Order.create(
-            {
-                userId,
-                addressId,
-                orderNumber: generateOrderNumber(),
-                subtotal: Number(
-                    subtotal.toFixed(2)
-                ),
-                discount,
-                shippingFee,
-                totalAmount: Number(
-                    totalAmount.toFixed(2)
-                ),
-                status: "CONFIRMED",
-                paymentStatus: "PENDING",
-            },
-            {
-                transaction,
-            }
-        );
-        // Create order items
-        for (const item of orderItems) {
-            await OrderItem.create(
-                {
-                    orderId: order.id,
-                    variantId: item.variantId,
-                    productName: item.productName,
-                    sku: item.sku,
-                    quantity: item.quantity,
-                    unitPrice: Number(
-                        item.unitPrice.toFixed(2)
-                    ),
-                    subtotal: Number(
-                        item.subtotal.toFixed(2)
-                    ),
-                },
-                {
+
+        // Release reserved inventory
+        for (const item of order.items) {
+            const inventory =
+                item.variant?.inventory;
+
+            if (inventory) {
+                const reservedQuantity =
+                    Number(
+                        inventory.reservedQuantity
+                    );
+
+                const orderQuantity =
+                    Number(item.quantity);
+
+                inventory.reservedQuantity =
+                    Math.max(
+                        0,
+                        reservedQuantity -
+                        orderQuantity
+                    );
+
+                await inventory.save({
                     transaction,
-                }
-            );
+                });
+            }
         }
-        // Create initial order status history
+
+        const previousStatus =
+            order.status;
+
+        // Update order status
+        order.status = "CANCELLED";
+
+        await order.save({
+            transaction,
+        });
+
+        // Add cancellation to status history
         await OrderStatusHistory.create(
             {
                 orderId: order.id,
-                status: "CONFIRMED",
-                note: "Order placed successfully",
+                status: "CANCELLED",
+                note: "Order cancelled by customer",
                 changedBy: userId,
             },
             {
@@ -208,38 +309,17 @@ export const createOrder = async (
             }
         );
 
-        // Reserve inventory
-        for (const cartItem of cartItems) {
-            const inventory =
-                cartItem.variant.inventory;
-            inventory.reservedQuantity +=
-                cartItem.quantity;
-
-            await inventory.save({
-                transaction,
-            });
-        }
-
-        // Clear cart
-        await CartItem.destroy({
-            where: {
-                cartId: cart.id,
-            },
-            transaction,
-        });
-
         await transaction.commit();
 
         return {
             orderId: order.id,
             orderNumber: order.orderNumber,
-            subtotal: Number(order.subtotal),
-            discount: Number(order.discount),
-            shippingFee: Number(order.shippingFee),
-            totalAmount: Number(order.totalAmount),
+            previousStatus,
             status: order.status,
-            paymentStatus: order.paymentStatus,
-            paymentMethod,
+            paymentStatus:
+                order.paymentStatus,
+            message:
+                "Order cancelled successfully",
         };
     } catch (error) {
         await transaction.rollback();
@@ -247,14 +327,20 @@ export const createOrder = async (
     }
 };
 
-// Seller updates order status
+
+// =====================================================
+// SELLER - UPDATE ORDER STATUS
+// =====================================================
+
 export const updateOrderStatus = async (
     orderId,
     sellerId,
     newStatus,
     note = null
 ) => {
-    const transaction = await sequelize.transaction();
+    const transaction =
+        await sequelize.transaction();
+
     try {
         const order = await Order.findByPk(
             orderId,
@@ -281,45 +367,68 @@ export const updateOrderStatus = async (
                 lock: transaction.LOCK.UPDATE,
             }
         );
+
         if (!order) {
             throw new AppError(
                 "Order not found",
                 STATUS_CODES.NOT_FOUND
             );
         }
-        if (!order.items || order.items.length === 0) {
+
+        if (
+            !order.items ||
+            order.items.length === 0
+        ) {
             throw new AppError(
                 "Order has no items",
                 STATUS_CODES.BAD_REQUEST
             );
         }
-        const sellerOwnsOrder = order.items.every(
-            (item) =>
-                item.variant?.product?.sellerId ===
-                sellerId
-        );
+
+        // Check seller owns all products
+        const sellerOwnsOrder =
+            order.items.every(
+                (item) =>
+                    Number(
+                        item.variant?.product
+                            ?.sellerId
+                    ) === Number(sellerId)
+            );
+
         if (!sellerOwnsOrder) {
             throw new AppError(
                 "You are not authorized to update this order",
                 STATUS_CODES.FORBIDDEN
             );
         }
-        const currentStatus = order.status;
-        const possibleStatuses = allowedTransitions[currentStatus] || [];
+
+        const currentStatus =
+            order.status;
+
+        const possibleStatuses =
+            allowedTransitions[
+                currentStatus
+            ] || [];
+
         if (
-            !possibleStatuses.includes(newStatus)
+            !possibleStatuses.includes(
+                newStatus
+            )
         ) {
             throw new AppError(
                 `Order cannot be changed from ${currentStatus} to ${newStatus}`,
                 STATUS_CODES.CONFLICT
             );
         }
-        // Update current order status
+
+        // Update order status
         order.status = newStatus;
+
         await order.save({
             transaction,
         });
-        // Add status history
+
+        // Create status history
         await OrderStatusHistory.create(
             {
                 orderId: order.id,
@@ -333,7 +442,9 @@ export const updateOrderStatus = async (
                 transaction,
             }
         );
+
         await transaction.commit();
+
         return {
             orderId: order.id,
             orderNumber: order.orderNumber,
