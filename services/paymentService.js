@@ -121,7 +121,7 @@ export const getPaymentsByUser = async (userId) => {
                 ],
             },
         ],
-        order: [["createdAt", "DESC"]],
+        order: [["created_at", "DESC"]],
     });
 };
 

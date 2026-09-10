@@ -79,6 +79,7 @@ export const MESSAGES = {
     PAYMENT_METHOD_FETCHED:"Payment methods fetched successfully",
     PAYMENT_METHOD_DELETED:"Payment method deleted successfully",
     DEFAULT_PAYMENT_METHOD_UPDATED:"Default payment method updated successfully",
+    PAYMENT_CREATED:"Payment created successfully",
 
     WISHLIST_ITEM_ADDED:"WishList item added successfully",
     WISHLIST_FETCHED:"WishList item fetched successfully",

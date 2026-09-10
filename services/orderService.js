@@ -18,10 +18,8 @@ const generateOrderNumber = () => {
     const random = Math.floor(
         1000 + Math.random() * 9000
     );
-
     return `SC-${timestamp}-${random}`;
 };
-
 // Allowed order status transitions
 const allowedTransitions = {
     PENDING: ["CONFIRMED", "CANCELLED"],
@@ -39,7 +37,6 @@ export const createOrder = async (
     paymentMethod
 ) => {
     const transaction = await sequelize.transaction();
-
     try {
         const address = await Address.findOne({
             where: {
@@ -198,7 +195,6 @@ export const createOrder = async (
                 }
             );
         }
-
         // Create initial order status history
         await OrderStatusHistory.create(
             {
@@ -297,15 +293,11 @@ export const updateOrderStatus = async (
                 STATUS_CODES.BAD_REQUEST
             );
         }
-
-        // Verify that the seller owns all products
-        // in this order.
         const sellerOwnsOrder = order.items.every(
             (item) =>
                 item.variant?.product?.sellerId ===
                 sellerId
         );
-
         if (!sellerOwnsOrder) {
             throw new AppError(
                 "You are not authorized to update this order",
@@ -313,8 +305,7 @@ export const updateOrderStatus = async (
             );
         }
         const currentStatus = order.status;
-        const possibleStatuses =
-            allowedTransitions[currentStatus] || [];
+        const possibleStatuses = allowedTransitions[currentStatus] || [];
         if (
             !possibleStatuses.includes(newStatus)
         ) {
