@@ -11,6 +11,7 @@ import {
     sendError,
     sendSuccess,
 } from "../utils/responseHandler.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 // CREATE NOTIFICATION
 // Mainly used internally by other services
@@ -25,8 +26,8 @@ const createCustomerNotification = asyncHandler(async (req, res) => {
         });
         return sendSuccess(
             res,
-            201,
-            "Notification created successfully",
+            STATUS_CODES.CREATED,
+            MESSAGES.NOTIFICATION_CREATED,
             {
                 notification,
             }
@@ -34,7 +35,7 @@ const createCustomerNotification = asyncHandler(async (req, res) => {
     } catch (error) {
         return sendError(
             res,
-            400,
+            STATUS_CODES.BAD_REQUEST,
             error.message
         );
     }
@@ -47,8 +48,8 @@ const getNotifications = asyncHandler(async (req, res) => {
         const notifications = await getCustomerNotifications(userId);
         return sendSuccess(
             res,
-            200,
-            "Notifications fetched successfully",
+            STATUS_CODES.OK,
+            MESSAGES.NOTIFICATION_FETCHED,
             {
                 notifications,
             }
@@ -56,7 +57,7 @@ const getNotifications = asyncHandler(async (req, res) => {
     } catch (error) {
         return sendError(
             res,
-            500,
+            STATUS_CODES.INTERNAL_SERVER_ERROR,
             error.message
         );
     }
@@ -69,8 +70,8 @@ const getUnreadCount = asyncHandler(async (req, res) => {
         const count = await getUnreadNotificationCount(userId);
         return sendSuccess(
             res,
-            200,
-            "Unread notification count fetched successfully",
+            STATUS_CODES.OK,
+            MESSAGES.UNREAD_NOTIFICATION_COUNT_FETCHED,
             {
                 count,
             }
@@ -78,7 +79,7 @@ const getUnreadCount = asyncHandler(async (req, res) => {
     } catch (error) {
         return sendError(
             res,
-            500,
+            STATUS_CODES.INTERNAL_SERVER_ERROR,
             error.message
         );
     }
@@ -95,8 +96,8 @@ const markAsRead = asyncHandler(async (req, res) => {
         );
         return sendSuccess(
             res,
-            200,
-            "Notification marked as read successfully",
+            STATUS_CODES.OK,
+            MESSAGES.NOTIFICATION_MARKED_AS_READ,
             {
                 notification,
             }
@@ -104,7 +105,7 @@ const markAsRead = asyncHandler(async (req, res) => {
     } catch (error) {
         return sendError(
             res,
-            404,
+            STATUS_CODES.NOT_FOUND,
             error.message
         );
     }
@@ -117,8 +118,8 @@ const markAllAsRead = asyncHandler(async (req, res) => {
         const updatedCount = await markAllNotificationsAsRead(userId);
         return sendSuccess(
             res,
-            200,
-            "All notifications marked as read successfully",
+            STATUS_CODES.OK,
+            MESSAGES.ALL_NOTIFICATION_MARKED_AS_READ,
             {
                 updatedCount,
             }
@@ -126,7 +127,7 @@ const markAllAsRead = asyncHandler(async (req, res) => {
     } catch (error) {
         return sendError(
             res,
-            500,
+            STATUS_CODES.INTERNAL_SERVER_ERROR,
             error.message
         );
     }
@@ -140,13 +141,13 @@ const deleteCustomerNotification = asyncHandler(async (req, res) => {
         await deleteNotification(id, userId);
         return sendSuccess(
             res,
-            200,
-            "Notification deleted successfully"
+            STATUS_CODES.OK,
+            MESSAGES.NOTIFICATION_DELETED
         );
     } catch (error) {
         return sendError(
             res,
-            404,
+            STATUS_CODES.NOT_FOUND,
             error.message
         );
     }

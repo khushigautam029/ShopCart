@@ -85,4 +85,12 @@ export const MESSAGES = {
     WISHLIST_FETCHED:"WishList item fetched successfully",
     WISHLIST_ITEM_REMOVED:"WishList item removed successfully",
 
+    ORDER_STATUS_HISTORY_FETCHED:"Order status history fetched.",
+    NOTIFICATION_CREATED:"Notification created successfully",
+    NOTIFICATION_FETCHED:"Notifications fetched successfully",
+    UNREAD_NOTIFICATION_COUNT_FETCHED:"Unread notification count fetched successfully",
+    NOTIFICATION_MARKED_AS_READ:"Notification marked as read successfully",
+    ALL_NOTIFICATION_MARKED_AS_READ:"All notifications marked as read successfully",
+    NOTIFICATION_DELETED:"Notification deleted successfully"
+
 };
