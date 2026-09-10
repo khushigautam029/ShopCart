@@ -5,6 +5,7 @@ import Cart from "./Cart.js";
 import CartItem from "./CartItem.js";
 import Category from "./Category.js";
 import Inventory from "./Inventory.js";
+import Notification from "./Notification.js";
 import Order from "./Order.js";
 import OrderItem from "./OrderItem.js";
 import OrderStatusHistory from "./OrderStatusHistory.js";
@@ -336,6 +337,17 @@ OrderStatusHistory.belongsTo(User, {
     as: "changedByUser",
 });
 
+// USER ↔ NOTIFICATION
+User.hasMany(Notification, {
+    foreignKey: "userId",
+    as: "notifications",
+});
+
+Notification.belongsTo(User, {
+    foreignKey: "userId",
+    as: "user",
+});
+
 // EXPORT MODELS
 export {
     Address,
@@ -344,8 +356,7 @@ export {
     Cart,
     CartItem,
     Category,
-    Inventory,
-    Order,
+    Inventory, Notification, Order,
     OrderItem, OrderStatusHistory, OtpVerification,
     Payment,
     PaymentMethod,

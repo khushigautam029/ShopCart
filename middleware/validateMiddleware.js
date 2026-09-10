@@ -1,12 +1,13 @@
 import { sendError } from "../utils/responseHandler.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
-const validate = (schema) => {
+const validate = (schema, source = "body") => {
     return (req, res, next) => {
-        const { error, value } = schema.validate(req.body, {
+        const { error, value } = schema.validate(req[source], {
             abortEarly: false,
             stripUnknown: true,
         });
+
         if (error) {
             return sendError(
                 res,
@@ -18,7 +19,7 @@ const validate = (schema) => {
                 }))
             );
         }
-        req.body = value;
+        req[source] = value;
         next();
     };
 };
