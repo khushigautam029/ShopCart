@@ -15,6 +15,7 @@ import PaymentMethod from "./PaymentMethod.js";
 import Product from "./Product.js";
 import ProductImage from "./ProductImage.js";
 import ProductVariant from "./ProductVariant.js";
+import Return from "./Return.js";
 import Review from "./Review.js";
 import SellerProfile from "./SellerProfile.js";
 import User from "./User.js";
@@ -348,6 +349,36 @@ Notification.belongsTo(User, {
     as: "user",
 });
 
+Order.hasMany(Return, {
+    foreignKey: "orderId",
+    as: "returns",
+});
+
+Return.belongsTo(Order, {
+    foreignKey: "orderId",
+    as: "order",
+});
+
+OrderItem.hasMany(Return, {
+    foreignKey: "orderItemId",
+    as: "returns",
+});
+
+Return.belongsTo(OrderItem, {
+    foreignKey: "orderItemId",
+    as: "orderItem",
+});
+
+User.hasMany(Return, {
+    foreignKey: "userId",
+    as: "returns",
+});
+
+Return.belongsTo(User, {
+    foreignKey: "userId",
+    as: "user",
+});
+
 // EXPORT MODELS
 export {
     Address,
@@ -362,8 +393,7 @@ export {
     PaymentMethod,
     Product,
     ProductImage,
-    ProductVariant,
-    Review,
+    ProductVariant, Return, Review,
     SellerProfile,
     User,
     VariantAttribute,
