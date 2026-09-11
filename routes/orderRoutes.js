@@ -1,7 +1,10 @@
 import express from "express";
 import {
+    cancelOrderController,
     changeOrderStatus,
-    placeOrder,
+    getMyOrdersController,
+    getOrderDetailsController,
+    getOrderStatusController,
 } from "../controllers/orderController.js";
 import protect from "../middleware/authMiddleware.js";
 import authorizeRoles from "../middleware/roleMiddleware.js";
@@ -9,22 +12,40 @@ import validate from "../middleware/validateMiddleware.js";
 import {
     updateOrderStatusSchema,
 } from "../validations/orderStatusValidation.js";
-import {
-    createOrderSchema,
-} from "../validations/orderValidation.js";
 
 const router = express.Router();
-
 router.use(protect);
 
-// Customer places order
-router.post(
+// CUSTOMER ROUTES
+// Get all my orders
+router.get(
     "/",
     authorizeRoles("CUSTOMER"),
-    validate(createOrderSchema),
-    placeOrder
+    getMyOrdersController
 );
 
+// Get specific order details
+router.get(
+    "/:orderId",
+    authorizeRoles("CUSTOMER"),
+    getOrderDetailsController
+);
+
+// Get specific order status + history
+router.get(
+    "/:orderId/status",
+    authorizeRoles("CUSTOMER"),
+    getOrderStatusController
+);
+
+// Cancel order
+router.post(
+    "/:orderId/cancel",
+    authorizeRoles("CUSTOMER"),
+    cancelOrderController
+);
+
+// SELLER ROUTES
 // Seller changes order status
 router.patch(
     "/:orderId/status",

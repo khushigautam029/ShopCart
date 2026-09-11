@@ -3,18 +3,25 @@ import Joi from "joi";
 export const updateOrderStatusSchema = Joi.object({
     status: Joi.string()
         .valid(
-            "PENDING",
-            "CONFIRMED",
             "PACKED",
             "SHIPPED",
             "OUT_FOR_DELIVERY",
-            "DELIVERED",
-            "CANCELLED"
+            "DELIVERED"
         )
-        .required(),
+        .required()
+        .messages({
+            "any.only":
+                "Status must be PACKED, SHIPPED, OUT_FOR_DELIVERY, or DELIVERED",
+            "any.required":
+                "Order status is required",
+        }),
 
     note: Joi.string()
         .max(255)
         .allow("", null)
-        .optional(),
+        .optional()
+        .messages({
+            "string.max":
+                "Note cannot exceed 255 characters",
+        }),
 });

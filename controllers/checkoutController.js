@@ -1,9 +1,13 @@
 import { checkout } from "../services/checkoutService.js";
-import { sendError, sendSuccess } from "../utils/responseHandler.js";
-import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import { sendSuccess } from "../utils/responseHandler.js";
+import {
+    MESSAGES,
+    STATUS_CODES,
+} from "../utils/setConstants.js";
 
-export const checkoutOrder = async (req, res) => {
-    try {
+export const checkoutOrder = asyncHandler(
+    async (req, res) => {
         const result = await checkout(
             req.user.id,
             req.body
@@ -13,15 +17,9 @@ export const checkoutOrder = async (req, res) => {
             res,
             STATUS_CODES.CREATED,
             MESSAGES.ORDER_PLACED,
-            { data: result }
-        );
-    } catch (error) {
-        console.error("Checkout Error:", error);
-
-        return sendError(
-            res,
-            STATUS_CODES.BAD_REQUEST,
-            error.message
+            {
+                data: result,
+            }
         );
     }
-};
+);
