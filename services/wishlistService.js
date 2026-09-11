@@ -1,10 +1,13 @@
 import { NUMBER } from "sequelize";
 import {
+    Cart,
+    CartItem,
     Inventory,
     Product,
     ProductImage,
+    ProductVariant,
     Wishlist,
-    WishlistItem
+    WishlistItem,
 } from "../models/index.js";
 
 export const addToWishlist = async (userId, productId) => {
