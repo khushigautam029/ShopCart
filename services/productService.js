@@ -99,11 +99,9 @@ export const getAllProducts = async (filters = {}) => {
         !isNaN(Number(maxPrice));
     if (hasMinPrice || hasMaxPrice) {
         where.price = {};
-
         if (hasMinPrice) {
             where.price[Op.gte] = Number(minPrice);
         }
-
         if (hasMaxPrice) {
             where.price[Op.lte] = Number(maxPrice);
         }
@@ -131,7 +129,6 @@ export const getAllProducts = async (filters = {}) => {
                 as: "category",
                 attributes: ["id", "name"],
             },
-
             {
                 model: ProductImage,
                 as: "images",
@@ -189,7 +186,6 @@ export const getAllProducts = async (filters = {}) => {
 };
 
 // GET PRODUCT BY ID
-
 export const getProductById = async (id) => {
     const product = await Product.findOne({
         where: {
