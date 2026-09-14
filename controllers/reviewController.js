@@ -10,6 +10,7 @@ import {
     sendSuccess,
 } from "../utils/responseHandler.js";
 import {
+    MESSAGES,
     STATUS_CODES
 } from "../utils/setConstants.js";
 
@@ -24,7 +25,7 @@ export const create = async (req, res) => {
         return sendSuccess(
             res,
             STATUS_CODES.CREATED,
-            "Review created successfully",
+            MESSAGES.REVIEW_CREATED,
             { data: review }
         );
     } catch (error) {
@@ -45,7 +46,7 @@ export const getByProduct = async (req, res) => {
         return sendSuccess(
             res,
             STATUS_CODES.OK,
-            "Reviews fetched successfully",
+            MESSAGES.REVIEWS_FETCHED,
             { data: reviews }
         );
     } catch (error) {
@@ -66,7 +67,7 @@ export const getById = async (req, res) => {
         return sendSuccess(
             res,
             STATUS_CODES.OK,
-            "Review fetched successfully",
+            MESSAGES.REVIEW_FETCHED,
             { data: review }
         );
     } catch (error) {
@@ -89,7 +90,7 @@ export const update = async (req, res) => {
         return sendSuccess(
             res,
             STATUS_CODES.OK,
-            "Review updated successfully",
+            MESSAGES.REVIEW_UPDATED,
             { data: review }
         );
     } catch (error) {
@@ -111,7 +112,7 @@ export const remove = async (req, res) => {
         return sendSuccess(
             res,
             STATUS_CODES.OK,
-            "Review deleted successfully"
+            MESSAGES.REVIEW_DELETED,
         );
     } catch (error) {
         return sendError(

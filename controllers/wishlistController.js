@@ -62,7 +62,7 @@ export const addToCart = asyncHandler(async (req, res) => {
     return sendSuccess(
         res,
         STATUS_CODES.CREATED,
-        "Product added to cart successfully",
+        MESSAGES.PRODUCT_ADDED_TO_CART,
         {
             data: cartItem,
         }

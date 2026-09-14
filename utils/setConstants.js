@@ -91,6 +91,19 @@ export const MESSAGES = {
     UNREAD_NOTIFICATION_COUNT_FETCHED:"Unread notification count fetched successfully",
     NOTIFICATION_MARKED_AS_READ:"Notification marked as read successfully",
     ALL_NOTIFICATION_MARKED_AS_READ:"All notifications marked as read successfully",
-    NOTIFICATION_DELETED:"Notification deleted successfully"
-
+    NOTIFICATION_DELETED:"Notification deleted successfully",
+    RETURN_REQUEST_CREATED:"Return request created successfully",
+    RETURNS_FETCHED:"Returns fetched Successfully",
+    RETURN_DETAIL_FETCHED:"Return detail Fetched Successfully",
+    RETURN_APPROVED:"Return Approved Successfully",
+    RETURN_REJECTED:"Return Rejected Successfully",
+    RETURN_MARKED_AS_PICKED_UP:"Return marked as picked up successfully",
+    RETURN_MARKED_AS_RECEIVED:"Return marked as received successfully",
+    RETURNED_CANCELLED:"Returned cancelled successfully",
+    PRODUCT_ADDED_TO_CART:"Product added to cart successfully",
+    REVIEW_CREATED:"Review created successfully",
+    REVIEWS_FETCHED:"Reviews fetched successfully",
+    REVIEW_FETCHED:"Review fetched successfully",
+    REVIEW_UPDATED:"Review updated successfully",
+    REVIEW_DELETED:"Review deleted successfully"
 };

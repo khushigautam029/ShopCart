@@ -10,7 +10,7 @@ import {
 } from "../services/returnService.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { sendSuccess } from "../utils/responseHandler.js";
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 // Customer-Create Return
 export const createReturnController = asyncHandler(
@@ -33,7 +33,7 @@ export const createReturnController = asyncHandler(
         return sendSuccess(
             res,
             STATUS_CODES.CREATED,
-            "Return request created successfully",
+            MESSAGES.RETURN_REQUEST_CREATED,
             {
                 data: returnRequest,
             }
@@ -51,7 +51,7 @@ export const getMyReturnsController = asyncHandler(
         return sendSuccess(
             res,
             STATUS_CODES.OK,
-            "Returns fetched Successfully",
+            MESSAGES.RETURNS_FETCHED,
             {
                 data: returns,
             }
@@ -70,7 +70,7 @@ export const getReturnByIdController = asyncHandler(
         return sendSuccess(
             res,
             STATUS_CODES.OK,
-            "Return detail Fetched Successfully",
+            MESSAGES.RETURN_DETAIL_FETCHED,
             {
                 data: returnRequest,
             }
@@ -88,7 +88,7 @@ export const approveReturnController = asyncHandler(
         return sendSuccess(
             res,
             STATUS_CODES.OK,
-            "Return Approved Successfully",
+            MESSAGES.RETURN_APPROVED,
             {
                 data: approveRequest
             }
@@ -108,7 +108,7 @@ export const rejectReturnController = asyncHandler(
         return sendSuccess(
             res,
             STATUS_CODES.OK,
-            "Return Rejected Successfully",
+            MESSAGES.RETURN_REJECTED,
             {
                 data: rejectRequest,
             }
@@ -126,7 +126,7 @@ export const markReturnPickedUpController = asyncHandler(
         return sendSuccess(
             res,
             STATUS_CODES.OK,
-            "Return marked as picked up successfully",
+            MESSAGES.RETURN_MARKED_AS_PICKED_UP,
             {
                 data: returnRequest,
             }
@@ -145,7 +145,7 @@ export const markReturnReceivedController = asyncHandler(
         return sendSuccess(
             res,
             STATUS_CODES.OK,
-            "Return marked as received successfully",
+            MESSAGES.RETURN_MARKED_AS_RECEIVED,
             {
                 data: returnRequest,
             }
@@ -163,7 +163,7 @@ export const cancelReturnController = asyncHandler(
         return sendSuccess(
             res,
             STATUS_CODES.OK,
-            "Returned cancelled successfully",
+            MESSAGES.RETURNED_CANCELLED,
             {
                 data: returnRequest,
             }
