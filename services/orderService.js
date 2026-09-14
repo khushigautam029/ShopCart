@@ -11,7 +11,6 @@ import {
 import AppError from "../utils/AppError.js";
 import { STATUS_CODES } from "../utils/setConstants.js";
 
-
 // Allowed seller order status transitions
 const allowedTransitions = {
     CONFIRMED: ["PACKED"],
@@ -22,11 +21,7 @@ const allowedTransitions = {
     CANCELLED: [],
 };
 
-
-// =====================================================
 // CUSTOMER - GET ALL ORDERS
-// =====================================================
-
 export const getMyOrders = async (userId) => {
     return await Order.findAll({
         where: {
@@ -61,11 +56,7 @@ export const getMyOrders = async (userId) => {
     });
 };
 
-
-// =====================================================
 // CUSTOMER - GET ORDER DETAILS
-// =====================================================
-
 export const getOrderDetails = async (
     userId,
     orderId
@@ -118,22 +109,16 @@ export const getOrderDetails = async (
             },
         ],
     });
-
     if (!order) {
         throw new AppError(
             "Order not found",
             STATUS_CODES.NOT_FOUND
         );
     }
-
     return order;
 };
 
-
-// =====================================================
 // CUSTOMER - GET ORDER STATUS
-// =====================================================
-
 export const getOrderStatus = async (
     userId,
     orderId
@@ -152,14 +137,12 @@ export const getOrderStatus = async (
             "updated_at",
         ],
     });
-
     if (!order) {
         throw new AppError(
             "Order not found",
             STATUS_CODES.NOT_FOUND
         );
     }
-
     const statusHistory =
         await OrderStatusHistory.findAll({
             where: {
@@ -184,18 +167,13 @@ export const getOrderStatus = async (
     };
 };
 
-
-// =====================================================
 // CUSTOMER - CANCEL ORDER
-// =====================================================
-
 export const cancelOrder = async (
     userId,
     orderId
 ) => {
     const transaction =
         await sequelize.transaction();
-
     try {
         const order = await Order.findOne({
             where: {
@@ -223,7 +201,6 @@ export const cancelOrder = async (
             transaction,
             lock: transaction.LOCK.UPDATE,
         });
-
         if (!order) {
             throw new AppError(
                 "Order not found",
@@ -263,23 +240,19 @@ export const cancelOrder = async (
         for (const item of order.items) {
             const inventory =
                 item.variant?.inventory;
-
             if (inventory) {
                 const reservedQuantity =
                     Number(
                         inventory.reservedQuantity
                     );
-
                 const orderQuantity =
                     Number(item.quantity);
-
                 inventory.reservedQuantity =
                     Math.max(
                         0,
                         reservedQuantity -
                         orderQuantity
                     );
-
                 await inventory.save({
                     transaction,
                 });
@@ -308,9 +281,7 @@ export const cancelOrder = async (
                 transaction,
             }
         );
-
         await transaction.commit();
-
         return {
             orderId: order.id,
             orderNumber: order.orderNumber,
@@ -328,10 +299,7 @@ export const cancelOrder = async (
 };
 
 
-// =====================================================
 // SELLER - UPDATE ORDER STATUS
-// =====================================================
-
 export const updateOrderStatus = async (
     orderId,
     sellerId,
@@ -340,7 +308,6 @@ export const updateOrderStatus = async (
 ) => {
     const transaction =
         await sequelize.transaction();
-
     try {
         const order = await Order.findByPk(
             orderId,
