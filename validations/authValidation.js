@@ -5,6 +5,8 @@ export const loginSchema = Joi.object({
         .trim()
         .pattern(/^[6-9]\d{9}$/)
         .required()
+        .min(10)
+        .max(10)
         .messages({
             "string.empty": "Phone number is required",
             "string.pattern.base":
