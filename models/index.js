@@ -4,6 +4,8 @@ import AttributeValue from "./AttributeValue.js";
 import Cart from "./Cart.js";
 import CartItem from "./CartItem.js";
 import Category from "./Category.js";
+import Coupon from "./Coupon.js";
+import CouponUsage from "./CouponUsage.js";
 import Inventory from "./Inventory.js";
 import Notification from "./Notification.js";
 import Order from "./Order.js";
@@ -379,6 +381,41 @@ Return.belongsTo(User, {
     as: "user",
 });
 
+// COUPON ↔ COUPON USAGE
+Coupon.hasMany(CouponUsage, {
+    foreignKey: "couponId",
+    as: "usages",
+});
+
+CouponUsage.belongsTo(Coupon, {
+    foreignKey: "couponId",
+    as: "coupon",
+});
+
+// USER ↔ COUPON USAGE
+
+User.hasMany(CouponUsage, {
+    foreignKey: "userId",
+    as: "couponUsages",
+});
+
+CouponUsage.belongsTo(User, {
+    foreignKey: "userId",
+    as: "user",
+});
+
+// ORDER ↔ COUPON USAGE
+
+Order.hasOne(CouponUsage, {
+    foreignKey: "orderId",
+    as: "couponUsage",
+});
+
+CouponUsage.belongsTo(Order, {
+    foreignKey: "orderId",
+    as: "order",
+});
+
 // EXPORT MODELS
 export {
     Address,
@@ -386,8 +423,7 @@ export {
     AttributeValue,
     Cart,
     CartItem,
-    Category,
-    Inventory, Notification, Order,
+    Category, Coupon, CouponUsage, Inventory, Notification, Order,
     OrderItem, OrderStatusHistory, OtpVerification,
     Payment,
     PaymentMethod,
