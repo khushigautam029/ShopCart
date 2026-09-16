@@ -13,14 +13,13 @@ import {
     STATUS_CODES,
 } from "../utils/setConstants.js";
 
-// CREATE COUPON
+// CREATE COUPON - SELLER
 export const createCouponController = asyncHandler(
     async (req, res) => {
         const coupon = await createCoupon(
             req.user.id,
             req.body
         );
-
         return sendSuccess(
             res,
             STATUS_CODES.CREATED,
@@ -30,10 +29,12 @@ export const createCouponController = asyncHandler(
     }
 );
 
-// GET ALL COUPONS
+// GET ALL COUPONS - SELLER
 export const getAllCouponsController = asyncHandler(
     async (req, res) => {
-        const coupons = await getAllCoupons();
+        const coupons = await getAllCoupons(
+            req.user.id
+        );
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -43,11 +44,12 @@ export const getAllCouponsController = asyncHandler(
     }
 );
 
-// GET COUPON BY ID
+// GET COUPON BY ID - SELLER
 export const getCouponByIdController = asyncHandler(
     async (req, res) => {
         const coupon = await getCouponById(
-            req.params.id
+            req.params.id,
+            req.user.id
         );
         return sendSuccess(
             res,
@@ -58,11 +60,12 @@ export const getCouponByIdController = asyncHandler(
     }
 );
 
-// UPDATE COUPON
+// UPDATE COUPON - SELLER
 export const updateCouponController = asyncHandler(
     async (req, res) => {
         const coupon = await updateCoupon(
             req.params.id,
+            req.user.id,
             req.body
         );
         return sendSuccess(
@@ -74,11 +77,12 @@ export const updateCouponController = asyncHandler(
     }
 );
 
-// DELETE / DEACTIVATE COUPON
+// DELETE / DEACTIVATE COUPON - SELLER
 export const deleteCouponController = asyncHandler(
     async (req, res) => {
         const coupon = await deleteCoupon(
-            req.params.id
+            req.params.id,
+            req.user.id
         );
         return sendSuccess(
             res,
@@ -89,7 +93,7 @@ export const deleteCouponController = asyncHandler(
     }
 );
 
-// APPLY COUPON
+// APPLY COUPON - CUSTOMER
 export const applyCouponController = asyncHandler(
     async (req, res) => {
         const result = await applyCoupon(

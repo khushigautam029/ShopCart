@@ -21,31 +21,45 @@ const router = express.Router();
 // AUTHENTICATION
 router.use(protect);
 
-// COUPON MANAGEMENT
+// SELLER COUPON MANAGEMENT
+// Create coupon
 router.post(
     "/",
     authorizeRoles("SELLER"),
     validate(createCouponSchema),
     createCouponController
 );
+
+// Get seller's coupons
 router.get(
     "/",
+    authorizeRoles("SELLER"),
     getAllCouponsController
 );
+
+// Get seller's coupon by ID
 router.get(
     "/:id",
+    authorizeRoles("SELLER"),
     getCouponByIdController
 );
+
+// Update seller's coupon
 router.put(
     "/:id",
+    authorizeRoles("SELLER"),
     validate(updateCouponSchema),
     updateCouponController
 );
+
+// Deactivate seller's coupon
 router.delete(
     "/:id",
+    authorizeRoles("SELLER"),
     deleteCouponController
 );
-// APPLY COUPON - CUSTOMER
+
+// CUSTOMER - APPLY COUPON
 router.post(
     "/apply",
     authorizeRoles("CUSTOMER"),
