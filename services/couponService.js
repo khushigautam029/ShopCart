@@ -12,7 +12,7 @@ import { STATUS_CODES } from "../utils/setConstants.js";
 
 
 // CREATE COUPON
-export const createCoupon = async (data) => {
+export const createCoupon = async (sellerId , data) => {
     const {
         code,
         discountType,
@@ -61,6 +61,7 @@ export const createCoupon = async (data) => {
     // Create coupon
     const coupon = await Coupon.create({
         code: code.toUpperCase(),
+        sellerId,
         discountType,
         discountValue,
         minOrderAmount,

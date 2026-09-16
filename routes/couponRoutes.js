@@ -24,6 +24,7 @@ router.use(protect);
 // COUPON MANAGEMENT
 router.post(
     "/",
+    authorizeRoles("SELLER"),
     validate(createCouponSchema),
     createCouponController
 );

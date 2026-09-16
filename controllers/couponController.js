@@ -13,11 +13,13 @@ import {
     STATUS_CODES,
 } from "../utils/setConstants.js";
 
-
 // CREATE COUPON
 export const createCouponController = asyncHandler(
     async (req, res) => {
-        const coupon = await createCoupon(req.body);
+        const coupon = await createCoupon(
+            req.user.id,
+            req.body
+        );
 
         return sendSuccess(
             res,

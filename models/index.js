@@ -416,6 +416,16 @@ CouponUsage.belongsTo(Order, {
     as: "order",
 });
 
+User.hasMany(Coupon, {
+    foreignKey: "sellerId",
+    as: "coupons",
+});
+
+Coupon.belongsTo(User, {
+    foreignKey: "sellerId",
+    as: "seller",
+});
+
 // EXPORT MODELS
 export {
     Address,

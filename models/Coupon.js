@@ -14,6 +14,11 @@ const Coupon = sequelize.define(
             allowNull: false,
             unique: true,
         },
+        sellerId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            field: "seller_id",
+        },
         discountType: {
             type: DataTypes.ENUM(
                 "FLAT",
