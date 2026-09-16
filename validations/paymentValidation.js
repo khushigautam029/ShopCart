@@ -18,7 +18,6 @@ export const createPaymentSchema = Joi.object({
             "any.required":
                 "Order ID is required",
         }),
-
     paymentMethodId: Joi.number()
         .integer()
         .positive()
