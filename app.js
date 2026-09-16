@@ -77,7 +77,7 @@ app.use("/api/wishlist", wishlistRoutes);
 app.use( "/api/order-status-history", orderStatusHistoryRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/returns", returnRoutes);
-app.use("/api/coupon",couponRoutes);
+app.use("/api/coupons",couponRoutes);
 
 //Global error handler
 app.use(errorHandler);

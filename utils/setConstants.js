@@ -105,5 +105,13 @@ export const MESSAGES = {
     REVIEWS_FETCHED:"Reviews fetched successfully",
     REVIEW_FETCHED:"Review fetched successfully",
     REVIEW_UPDATED:"Review updated successfully",
-    REVIEW_DELETED:"Review deleted successfully"
+    REVIEW_DELETED:"Review deleted successfully",
+
+    COUPON_CREATED:"Coupon created successfully",
+    COUPONS_FETCHED:"Coupons fetched successfully",
+    COUPON_FETCHED:"Coupon fetched successfully",
+    COUPON_UPDATED:"Coupon updated successfully",
+    COUPON_DELETED:"Coupon deleted successfully",
+    COUPON_APPLIED:"Coupon applied successfully",
+
 };
