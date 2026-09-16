@@ -4,15 +4,15 @@ import sequelize from "../config/database.js";
 const Order = sequelize.define(
     "Order",
     {
-        id:{
-            type:DataTypes.INTEGER,
-            autoIncrement:true,
-            primaryKey:true,
+        id: {
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
+            primaryKey: true,
         },
-        userId :{
-            type:DataTypes.INTEGER,
-            allowNull:false,
-            field:"user_id",
+        userId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            field: "user_id",
         },
 
         addressId: {
@@ -44,6 +44,18 @@ const Order = sequelize.define(
             allowNull: false,
             defaultValue: 0,
             field: "shipping_fee",
+        },
+
+        couponId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            field: "coupon_id",
+        },
+
+        couponCode: {
+            type: DataTypes.STRING(50),
+            allowNull: true,
+            field: "coupon_code",
         },
 
         totalAmount: {
