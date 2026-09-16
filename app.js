@@ -9,6 +9,7 @@ import authRoutes from "./routes/authRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import checkoutRoutes from "./routes/checkoutRoutes.js";
+import couponRoutes from "./routes/couponRoutes.js";
 import inventoryRoutes from "./routes/inventoryRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
@@ -76,6 +77,7 @@ app.use("/api/wishlist", wishlistRoutes);
 app.use( "/api/order-status-history", orderStatusHistoryRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/returns", returnRoutes);
+app.use("/api/coupon",couponRoutes);
 
 //Global error handler
 app.use(errorHandler);
