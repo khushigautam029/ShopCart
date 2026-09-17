@@ -1,5 +1,6 @@
 import sequelize from "../config/database.js";
 
+import { randomUUID } from "crypto";
 import Address from "../models/Address.js";
 import Cart from "../models/Cart.js";
 import CartItem from "../models/CartItem.js";
@@ -11,7 +12,6 @@ import OrderItem from "../models/OrderItem.js";
 import OrderStatusHistory from "../models/OrderStatusHistory.js";
 import Product from "../models/Product.js";
 import ProductVariant from "../models/ProductVariant.js";
-
 import AppError from "../utils/AppError.js";
 import { STATUS_CODES } from "../utils/setConstants.js";
 
@@ -288,8 +288,7 @@ export const checkout = async (userId, data) => {
             subtotal -
             discount +
             shippingFee;
-        const orderNumber =
-            `ORD-${Date.now()}-${userId}`;
+        const orderNumber = `ORD-${randomUUID()}`;
         const order = await Order.create(
             {
                 userId,

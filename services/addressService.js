@@ -1,6 +1,12 @@
+import sequelize from "../config/database.js";
 import { Address } from "../models/index.js";
 
-const setDefaultAddress = async (userId, addressId) => {
+const setDefaultAddress = async (
+    userId,
+    addressId,
+    transaction
+) => {
+    // First remove default from all user's addresses
     await Address.update(
         {
             isDefault: false,
@@ -9,8 +15,11 @@ const setDefaultAddress = async (userId, addressId) => {
             where: {
                 userId,
             },
+            transaction,
         }
     );
+
+    // Then make selected address default
     await Address.update(
         {
             isDefault: true,
@@ -20,6 +29,7 @@ const setDefaultAddress = async (userId, addressId) => {
                 id: addressId,
                 userId,
             },
+            transaction,
         }
     );
 };
@@ -28,17 +38,30 @@ export const createAddress = async (
     userId,
     data
 ) => {
-    const address = await Address.create({
-        userId,
-        ...data,
-    });
-    if (data.isDefault === true) {
-        await setDefaultAddress(
-            userId,
-            address.id
+    const transaction = await sequelize.transaction();
+    try {
+        const address = await Address.create(
+            {
+                userId,
+                ...data,
+            },
+            {
+                transaction,
+            }
         );
+        if (data.isDefault === true) {
+            await setDefaultAddress(
+                userId,
+                address.id,
+                transaction
+            );
+        }
+        await transaction.commit();
+        return address;
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
     }
-    return address;
 };
 
 export const getAddresses = async (userId) => {
@@ -70,23 +93,38 @@ export const updateAddress = async (
     addressId,
     data
 ) => {
-    const address = await Address.findOne({
-        where: {
-            id: addressId,
-            userId,
-        },
-    });
-    if (!address) {
-        throw new Error("Address not found");
+    const transaction = await sequelize.transaction();
+    try {
+        const address = await Address.findOne({
+            where: {
+                id: addressId,
+                userId,
+            },
+            transaction,
+            lock: transaction.LOCK.UPDATE,
+        });
+
+        if (!address) {
+            throw new Error("Address not found");
+        }
+
+        await address.update(data, {
+            transaction,
+        });
+
+        if (data.isDefault === true) {
+            await setDefaultAddress(
+                userId,
+                address.id,
+                transaction
+            );
+        }
+        await transaction.commit();
+        return address;
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
     }
-    await address.update(data);
-    if (data.isDefault === true) {
-        await setDefaultAddress(
-            userId,
-            address.id
-        );
-    }
-    return address;
 };
 
 export const deleteAddress = async (
@@ -110,18 +148,33 @@ export const makeDefaultAddress = async (
     userId,
     addressId
 ) => {
-    const address = await Address.findOne({
-        where: {
-            id: addressId,
+    const transaction = await sequelize.transaction();
+    try {
+        const address = await Address.findOne({
+            where: {
+                id: addressId,
+                userId,
+            },
+            transaction,
+            lock: transaction.LOCK.UPDATE,
+        });
+        if (!address) {
+            throw new Error("Address not found");
+        }
+        await setDefaultAddress(
             userId,
-        },
-    });
-    if (!address) {
-        throw new Error("Address not found");
+            addressId,
+            transaction
+        );
+        await transaction.commit();
+        return await Address.findOne({
+            where: {
+                id: addressId,
+                userId,
+            },
+        });
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
     }
-    await setDefaultAddress(
-        userId,
-        addressId
-    );
-    return await Address.findByPk(addressId);
 };

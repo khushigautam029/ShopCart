@@ -10,6 +10,7 @@ import {
 import AppError from "../utils/AppError.js";
 import { STATUS_CODES } from "../utils/setConstants.js";
 
+
 // CREATE COUPON - SELLER
 export const createCoupon = async (sellerId, data) => {
     const {
