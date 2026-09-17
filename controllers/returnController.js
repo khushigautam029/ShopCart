@@ -6,13 +6,15 @@ import {
     getReturnById,
     markReturnPickedUp,
     markReturnReceived,
-    rejectReturn
+    refundReturn,
+    rejectReturn,
 } from "../services/returnService.js";
+
 import asyncHandler from "../utils/asyncHandler.js";
 import { sendSuccess } from "../utils/responseHandler.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
-// Customer-Create Return
+// CUSTOMER - CREATE RETURN
 export const createReturnController = asyncHandler(
     async (req, res) => {
         const {
@@ -20,16 +22,18 @@ export const createReturnController = asyncHandler(
             orderItemId,
             quantity,
             reason,
-            description
+            description,
         } = req.body;
+
         const returnRequest = await createReturn(
             req.user.id,
             Number(orderId),
             Number(orderItemId),
             Number(quantity),
             reason,
-            description,
+            description
         );
+
         return sendSuccess(
             res,
             STATUS_CODES.CREATED,
@@ -41,7 +45,7 @@ export const createReturnController = asyncHandler(
     }
 );
 
-// Get my returns
+// CUSTOMER - GET MY RETURNS
 export const getMyReturnsController = asyncHandler(
     async (req, res) => {
         const returns = await getMyReturns(
@@ -59,7 +63,7 @@ export const getMyReturnsController = asyncHandler(
     }
 );
 
-//Get BY ID
+// CUSTOMER - GET RETURN BY ID
 export const getReturnByIdController = asyncHandler(
     async (req, res) => {
         const returnRequest = await getReturnById(
@@ -78,6 +82,7 @@ export const getReturnByIdController = asyncHandler(
     }
 );
 
+// SELLER - APPROVE RETURN
 export const approveReturnController = asyncHandler(
     async (req, res) => {
         const approveRequest = await approveReturn(
@@ -90,21 +95,23 @@ export const approveReturnController = asyncHandler(
             STATUS_CODES.OK,
             MESSAGES.RETURN_APPROVED,
             {
-                data: approveRequest
+                data: approveRequest,
             }
         );
     }
 );
 
-// Reject Request
+// SELLER - REJECT RETURN
 export const rejectReturnController = asyncHandler(
-    async (res, req) => {
+    async (req, res) => {
         const { note } = req.body;
+
         const rejectRequest = await rejectReturn(
             req.user.id,
             Number(req.params.id),
             note
         );
+
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -116,57 +123,86 @@ export const rejectReturnController = asyncHandler(
     }
 );
 
-//Marked Returned Picked Up
-export const markReturnPickedUpController = asyncHandler(
-    async (req, res) => {
-        const returnRequest = await markReturnPickedUp(
-            req.user.id,
-            Number(req.params.id)
-        );
-        return sendSuccess(
-            res,
-            STATUS_CODES.OK,
-            MESSAGES.RETURN_MARKED_AS_PICKED_UP,
-            {
-                data: returnRequest,
-            }
-        );
-    }
-);
+// SELLER - MARK RETURN PICKED UP
+export const markReturnPickedUpController =
+    asyncHandler(
+        async (req, res) => {
+            const returnRequest =
+                await markReturnPickedUp(
+                    req.user.id,
+                    Number(req.params.id)
+                );
 
-//Mark Return Received
-export const markReturnReceivedController = asyncHandler(
-    async (req, res) => {
-        const returnRequest = await markReturnReceived(
-            req.user.id,
-            Number(req.params.id)
-        );
+            return sendSuccess(
+                res,
+                STATUS_CODES.OK,
+                MESSAGES.RETURN_MARKED_AS_PICKED_UP,
+                {
+                    data: returnRequest,
+                }
+            );
+        }
+    );
 
-        return sendSuccess(
-            res,
-            STATUS_CODES.OK,
-            MESSAGES.RETURN_MARKED_AS_RECEIVED,
-            {
-                data: returnRequest,
-            }
-        );
-    }
-);
+// SELLER - MARK RETURN RECEIVED
+export const markReturnReceivedController =
+    asyncHandler(
+        async (req, res) => {
+            const returnRequest =
+                await markReturnReceived(
+                    req.user.id,
+                    Number(req.params.id)
+                );
 
-//Cancel Return
-export const cancelReturnController = asyncHandler(
-    async(req,res) => {
-        const returnRequest = await cancelReturn(
-            req.user.id,
-            Number(req.params.id)
-        );
-        return sendSuccess(
-            res,
-            STATUS_CODES.OK,
-            MESSAGES.RETURNED_CANCELLED,
-            {
-                data: returnRequest,
-            }
-        );
-    }
-);
+            return sendSuccess(
+                res,
+                STATUS_CODES.OK,
+                MESSAGES.RETURN_MARKED_AS_RECEIVED,
+                {
+                    data: returnRequest,
+                }
+            );
+        }
+    );
+
+// SELLER - REFUND RETURN
+export const refundReturnController =
+    asyncHandler(
+        async (req, res) => {
+            const refundRequest =
+                await refundReturn(
+                    req.user.id,
+                    Number(req.params.id)
+                );
+
+            return sendSuccess(
+                res,
+                STATUS_CODES.OK,
+                "Refund processed successfully",
+                {
+                    data: refundRequest,
+                }
+            );
+        }
+    );
+
+// CUSTOMER - CANCEL RETURN
+export const cancelReturnController =
+    asyncHandler(
+        async (req, res) => {
+            const returnRequest =
+                await cancelReturn(
+                    req.user.id,
+                    Number(req.params.id)
+                );
+
+            return sendSuccess(
+                res,
+                STATUS_CODES.OK,
+                MESSAGES.RETURNED_CANCELLED,
+                {
+                    data: returnRequest,
+                }
+            );
+        }
+    );

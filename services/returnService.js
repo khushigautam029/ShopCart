@@ -1,9 +1,12 @@
 import sequelize from "../config/database.js";
-import Order from "../models/Order.js";
-import OrderItem from "../models/OrderItem.js";
-import Product from "../models/Product.js";
-import ProductVariant from "../models/ProductVariant.js";
-import Return from "../models/Return.js";
+import {
+    Order,
+    OrderItem,
+    Payment,
+    Product,
+    ProductVariant,
+    Return,
+} from "../models/index.js";
 import AppError from "../utils/AppError.js";
 import { STATUS_CODES } from "../utils/setConstants.js";
 
@@ -17,6 +20,7 @@ export const createReturn = async (
     description = null
 ) => {
     const transaction = await sequelize.transaction();
+
     try {
         // 1. Check customer's order
         const order = await Order.findOne({
@@ -26,12 +30,14 @@ export const createReturn = async (
             },
             transaction,
         });
+
         if (!order) {
             throw new AppError(
                 "Order not found",
                 STATUS_CODES.NOT_FOUND
             );
         }
+
         // 2. Return is allowed only after delivery
         if (order.status !== "DELIVERED") {
             throw new AppError(
@@ -39,6 +45,7 @@ export const createReturn = async (
                 STATUS_CODES.CONFLICT
             );
         }
+
         // 3. Find order item
         const orderItem = await OrderItem.findOne({
             where: {
@@ -47,6 +54,7 @@ export const createReturn = async (
             },
             transaction,
         });
+
         if (!orderItem) {
             throw new AppError(
                 "Order item not found",
@@ -57,6 +65,7 @@ export const createReturn = async (
         // 4. Validate quantity
         const requestedQuantity = Number(quantity);
         const orderedQuantity = Number(orderItem.quantity);
+
         if (
             !Number.isInteger(requestedQuantity) ||
             requestedQuantity <= 0
@@ -88,14 +97,17 @@ export const createReturn = async (
                 total + Number(returnItem.quantity),
             0
         );
+
         const remainingQuantity =
             orderedQuantity - returnedQuantity;
+
         if (requestedQuantity > remainingQuantity) {
             throw new AppError(
                 `Only ${remainingQuantity} item(s) are available for return`,
                 STATUS_CODES.CONFLICT
             );
         }
+
         // 6. Create return request
         const returnRequest = await Return.create(
             {
@@ -112,7 +124,9 @@ export const createReturn = async (
                 transaction,
             }
         );
+
         await transaction.commit();
+
         return returnRequest;
     } catch (error) {
         await transaction.rollback();
@@ -280,16 +294,13 @@ export const rejectReturn = async (
             returnId,
             transaction
         );
-
         if (returnRequest.status !== "REQUESTED") {
             throw new AppError(
                 `Return cannot be rejected when its status is ${returnRequest.status}`,
                 STATUS_CODES.CONFLICT
             );
         }
-
         returnRequest.status = "REJECTED";
-
         if (note) {
             returnRequest.description = returnRequest.description
                 ? `${returnRequest.description} | Seller: ${note}`
@@ -342,30 +353,24 @@ export const markReturnReceived = async (
     returnId
 ) => {
     const transaction = await sequelize.transaction();
-
     try {
         const returnRequest = await getSellerReturn(
             sellerId,
             returnId,
             transaction
         );
-
         if (returnRequest.status !== "PICKED_UP") {
             throw new AppError(
                 `Return must be PICKED_UP before it can be received. Current status: ${returnRequest.status}`,
                 STATUS_CODES.CONFLICT
             );
         }
-
         returnRequest.status = "RECEIVED";
         returnRequest.receivedAt = new Date();
-
         await returnRequest.save({
             transaction,
         });
-
         await transaction.commit();
-
         return returnRequest;
     } catch (error) {
         await transaction.rollback();
@@ -373,6 +378,181 @@ export const markReturnReceived = async (
     }
 };
 
+// SELLER - REFUND RETURN
+export const refundReturn = async (
+    sellerId,
+    returnId
+) => {
+    const transaction = await sequelize.transaction();
+
+    try {
+        // 1. Verify seller owns this return
+        const returnRequest = await getSellerReturn(
+            sellerId,
+            returnId,
+            transaction
+        );
+
+        // 2. Refund only after item is received
+        if (returnRequest.status !== "RECEIVED") {
+            throw new AppError(
+                `Return must be RECEIVED before refund. Current status: ${returnRequest.status}`,
+                STATUS_CODES.CONFLICT
+            );
+        }
+
+        // 3. Find order
+        const order = await Order.findOne({
+            where: {
+                id: returnRequest.orderId,
+            },
+            transaction,
+            lock: transaction.LOCK.UPDATE,
+        });
+
+        if (!order) {
+            throw new AppError(
+                "Order not found",
+                STATUS_CODES.NOT_FOUND
+            );
+        }
+
+        // 4. Find payment
+        const payment = await Payment.findOne({
+            where: {
+                orderId: order.id,
+            },
+            transaction,
+            lock: transaction.LOCK.UPDATE,
+        });
+
+        if (!payment) {
+            throw new AppError(
+                "Payment not found for this order",
+                STATUS_CODES.NOT_FOUND
+            );
+        }
+
+        // 5. Payment must be paid before refund
+        if (payment.status !== "PAID") {
+            throw new AppError(
+                `Payment cannot be refunded when its status is ${payment.status}`,
+                STATUS_CODES.CONFLICT
+            );
+        }
+        // 6. Find order item
+        const orderItem = await OrderItem.findOne({
+            where: {
+                id: returnRequest.orderItemId,
+                orderId: order.id,
+            },
+            transaction,
+        });
+        if (!orderItem) {
+            throw new AppError(
+                "Order item not found",
+                STATUS_CODES.NOT_FOUND
+            );
+        }
+
+        /*
+         * REFUND CALCULATION
+         * Example:
+         * Order subtotal = ₹2,000
+         * Coupon discount = ₹200
+         * Item subtotal = ₹1,000
+         * Item's share of discount:
+         * 1000 / 2000 × 200 = ₹100
+         * Refund for one returned item:
+         * ₹1,000 - ₹100 = ₹900
+         */
+        const orderSubtotal = Number(order.subtotal);
+        const orderDiscount = Number(order.discount || 0);
+        const itemSubtotal = Number(orderItem.subtotal);
+        const returnedQuantity = Number(returnRequest.quantity);
+        const itemQuantity = Number(orderItem.quantity);
+        if (itemQuantity <= 0 || returnedQuantity <= 0) {
+            throw new AppError(
+                "Invalid return quantity",
+                STATUS_CODES.BAD_REQUEST
+            );
+        }
+        // Price of the returned quantity before discount
+        const returnedItemSubtotal =
+            (itemSubtotal / itemQuantity) *
+            returnedQuantity;
+
+        let allocatedDiscount = 0;
+
+        // Allocate order-level discount proportionally
+        if (
+            orderSubtotal > 0 &&
+            orderDiscount > 0
+        ) {
+            allocatedDiscount =
+                (returnedItemSubtotal / orderSubtotal) *
+                orderDiscount;
+        }
+
+        let refundAmount =
+            returnedItemSubtotal -
+            allocatedDiscount;
+
+        // Avoid negative refund due to rounding
+        refundAmount = Math.max(
+            0,
+            Number(refundAmount.toFixed(2))
+        );
+
+        // 7. Simulated refund
+        payment.status = "REFUNDED";
+
+        await payment.save({
+            transaction,
+        });
+
+        // 8. Update order payment status
+        order.paymentStatus = "REFUNDED";
+
+        await order.save({
+            transaction,
+        });
+
+        // 9. Update return
+        returnRequest.status = "REFUNDED";
+        returnRequest.refundedAt = new Date();
+
+        await returnRequest.save({
+            transaction,
+        });
+
+        await transaction.commit();
+
+        return {
+            returnId: returnRequest.id,
+            orderId: order.id,
+            orderNumber: order.orderNumber,
+            orderItemId: orderItem.id,
+            quantity: returnedQuantity,
+            itemSubtotal: Number(
+                returnedItemSubtotal.toFixed(2)
+            ),
+            allocatedDiscount: Number(
+                allocatedDiscount.toFixed(2)
+            ),
+            refundAmount,
+            currency: payment.currency,
+            paymentStatus: payment.status,
+            orderPaymentStatus: order.paymentStatus,
+            returnStatus: returnRequest.status,
+            refundedAt: returnRequest.refundedAt,
+            message: "Refund processed successfully",
+        };
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
+    }
+};
 
 // CUSTOMER - CANCEL RETURN
 export const cancelReturn = async (
@@ -408,15 +588,11 @@ export const cancelReturn = async (
                 STATUS_CODES.CONFLICT
             );
         }
-
         returnRequest.status = "CANCELLED";
-
         await returnRequest.save({
             transaction,
         });
-
         await transaction.commit();
-
         return returnRequest;
     } catch (error) {
         await transaction.rollback();
@@ -424,11 +600,7 @@ export const cancelReturn = async (
     }
 };
 
-
-// =====================================================
 // INTERNAL HELPER - GET SELLER RETURN
-// =====================================================
-
 const getSellerReturn = async (
     sellerId,
     returnId,

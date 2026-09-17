@@ -7,6 +7,7 @@ import {
     getReturnByIdController,
     markReturnPickedUpController,
     markReturnReceivedController,
+    refundReturnController,
     rejectReturnController,
 } from "../controllers/returnController.js";
 import protect from "../middleware/authMiddleware.js";
@@ -59,6 +60,7 @@ router.patch(
     authorizeRoles("SELLER"),
     approveReturnController
 );
+
 // Reject return
 router.patch(
     "/:id/reject",
@@ -66,17 +68,26 @@ router.patch(
     validate(rejectReturnSchema),
     rejectReturnController
 );
+
 // Mark return as picked up
 router.patch(
     "/:id/picked-up",
     authorizeRoles("SELLER"),
     markReturnPickedUpController
 );
+
 // Mark return as received
 router.patch(
     "/:id/received",
     authorizeRoles("SELLER"),
     markReturnReceivedController
+);
+
+// Process refund
+router.patch(
+    "/:id/refund",
+    authorizeRoles("SELLER"),
+    refundReturnController
 );
 
 export default router;
