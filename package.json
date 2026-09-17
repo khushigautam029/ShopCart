@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --runInBand",
+    "test:watch": "jest --watch",
     "dev": "nodemon server.js",
     "start": "node server.js"
   },
@@ -28,5 +29,9 @@
   "devDependencies": {
     "nodemon": "^3.1.14",
     "sequelize-cli": "^6.6.5"
-  }
+  },
+  "jest": {
+        "testEnvironment": "node",
+        "transform": {}
+    }
 }
