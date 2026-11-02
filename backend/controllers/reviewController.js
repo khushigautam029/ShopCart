@@ -1,0 +1,124 @@
+import {
+    createReview,
+    deleteReview,
+    getProductReviews,
+    getReviewById,
+    updateReview,
+} from "../services/reviewService.js";
+import {
+    sendError,
+    sendSuccess,
+} from "../utils/responseHandler.js";
+import {
+    MESSAGES,
+    STATUS_CODES
+} from "../utils/setConstants.js";
+
+
+export const create = async (req, res) => {
+    try {
+        const review = await createReview(
+            req.user.id,
+            req.params.productId,
+            req.body
+        );
+        return sendSuccess(
+            res,
+            STATUS_CODES.CREATED,
+            MESSAGES.REVIEW_CREATED,
+            { data: review }
+        );
+    } catch (error) {
+        return sendError(
+            res,
+            STATUS_CODES.BAD_REQUEST,
+            error.message
+        );
+    }
+};
+
+
+export const getByProduct = async (req, res) => {
+    try {
+        const reviews = await getProductReviews(
+            req.params.productId
+        );
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.REVIEWS_FETCHED,
+            { data: reviews }
+        );
+    } catch (error) {
+        return sendError(
+            res,
+            STATUS_CODES.NOT_FOUND,
+            error.message
+        );
+    }
+};
+
+
+export const getById = async (req, res) => {
+    try {
+        const review = await getReviewById(
+            req.params.id
+        );
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.REVIEW_FETCHED,
+            { data: review }
+        );
+    } catch (error) {
+        return sendError(
+            res,
+            STATUS_CODES.NOT_FOUND,
+            error.message
+        );
+    }
+};
+
+
+export const update = async (req, res) => {
+    try {
+        const review = await updateReview(
+            req.params.id,
+            req.user.id,
+            req.body
+        );
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.REVIEW_UPDATED,
+            { data: review }
+        );
+    } catch (error) {
+        return sendError(
+            res,
+            STATUS_CODES.BAD_REQUEST,
+            error.message
+        );
+    }
+};
+
+
+export const remove = async (req, res) => {
+    try {
+        await deleteReview(
+            req.params.id,
+            req.user.id
+        );
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.REVIEW_DELETED,
+        );
+    } catch (error) {
+        return sendError(
+            res,
+            STATUS_CODES.BAD_REQUEST,
+            error.message
+        );
+    }
+};
