@@ -9,7 +9,6 @@ export function AuthProvider({ children }) {
     useEffect(() => {
         if (token) {
             localStorage.setItem('token', token);
-            // In integration phase, fetch user profile from /auth/me or decode token here
         } else {
             localStorage.removeItem('token');
             setUser(null);
