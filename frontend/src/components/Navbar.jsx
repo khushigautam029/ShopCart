@@ -1,19 +1,22 @@
+
 import { useState } from "react";
 import {
-    FiHeadphones,
     FiHeart,
     FiMenu,
-    FiPackage,
     FiSearch,
     FiShoppingCart,
     FiUser,
     FiX,
 } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [search, setSearch] = useState("");
+
+    const navigate = useNavigate();
+    const { user, isAuthenticated } = useAuth();
 
     const navLinks = [
         { name: "Home", href: "/" },
@@ -28,147 +31,168 @@ const Navbar = () => {
     const handleSearch = (e) => {
         e.preventDefault();
 
-        if (!search.trim()) return;
+        const searchValue = search.trim();
 
-        window.location.href = `/products?search=${encodeURIComponent(search.trim())}`;
+        if (!searchValue) return;
+
+        navigate(`/products?search=${encodeURIComponent(searchValue)}`);
+        setMenuOpen(false);
     };
 
     return (
-        <>
-            {/* Top promotional bar */}
-            <div className="bg-[#7652A5] text-white px-4 py-2">
-                <div className="max-w-7xl mx-auto flex justify-between items-center text-xs">
-                    <div className="flex items-center gap-2">
-                        <FiPackage className="text-[#E9E0F5]" />
-                        <span>Free Shipping on Orders Above ₹999</span>
-                        <span className="hidden sm:inline mx-2 text-white/40">|</span>
-                        <span className="hidden sm:inline">30 Days Easy Returns</span>
-                    </div>
-
-                    <div className="hidden sm:flex items-center gap-5">
-                        <a href="#orders" className="hover:text-[#E9E0F5] transition">
-                            Track Order
-                        </a>
-                        <a href="#support" className="flex items-center gap-1 hover:text-[#E9E0F5] transition">
-                            <FiHeadphones /> Help
-                        </a>
-                    </div>
-                </div>
-            </div>
+        <header className="sticky top-0 z-50 w-full bg-white text-[#30283B] shadow-sm shadow-[#7652A5]/10">
 
             {/* Main Navbar */}
-            <header className="sticky top-0 z-50 bg-white text-[#30283B] shadow-md shadow-[#7652A5]/10">
+            <div className="w-full px-4 sm:px-6 lg:px-10">
 
-                <div className="max-w-7xl mx-auto px-4 lg:px-8">
+                <div className="min-h-[64px] flex items-center justify-between gap-4">
 
-                    <div className="h-[76px] flex items-center justify-between gap-5">
+                    {/* Logo */}
+                    <Link to="/" className="flex items-center gap-2 shrink-0">
+                        <div className="bg-[#7652A5] p-2 rounded-lg">
+                            <FiShoppingCart className="text-lg text-white" />
+                        </div>
 
-                        {/* Logo */}
-                        <Link to="/" className="flex items-center gap-2 shrink-0">
-                            <div className="bg-[#7652A5] p-2 rounded-lg">
-                                <FiShoppingCart className="text-xl text-white" />
-                            </div>
+                        <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#30283B]">
+                            Shop<span className="text-[#7652A5]">Cart.</span>
+                        </span>
+                    </Link>
 
-                            <span className="text-2xl md:text-3xl font-extrabold tracking-tight text-[#30283B]">
-                                Shop<span className="text-[#7652A5]">Cart.</span>
+                    {/* Desktop Search */}
+                    <form
+                        onSubmit={handleSearch}
+                        className="hidden md:flex flex-1 max-w-2xl mx-5 items-center bg-[#F8F6FB] border border-[#E9E0F5] rounded-full px-4 py-2 focus-within:border-[#7652A5] focus-within:ring-2 focus-within:ring-[#7652A5]/10 transition"
+                    >
+                        <FiSearch className="text-lg text-[#7652A5] shrink-0" />
+
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Search for products, brands..."
+                            className="bg-transparent outline-none text-sm text-[#30283B] placeholder-[#9992A4] w-full px-3"
+                        />
+
+                        <button
+                            type="submit"
+                            aria-label="Search"
+                            className="text-[#7652A5] hover:text-[#5E3F89] transition"
+                        >
+                            <FiSearch className="text-lg" />
+                        </button>
+                    </form>
+
+                    {/* Action Icons */}
+                    <div className="flex items-center gap-4 sm:gap-5 shrink-0">
+
+                        <Link
+                            to={isAuthenticated ? "/profile" : "/login"}
+                            className="flex items-center gap-2 hover:text-[#7652A5] transition"
+                            title="Account"
+                        >
+                            <FiUser className="text-xl" />
+                            <span className="hidden lg:block text-sm font-medium max-w-[100px] truncate">
+                                {isAuthenticated
+                                    ? user?.name || user?.phone || "Account"
+                                    : "Account"}
                             </span>
                         </Link>
 
-                        {/* Search */}
+                        <Link
+                            to="/wishlist"
+                            className="flex items-center gap-2 hover:text-[#7652A5] transition"
+                            title="Wishlist"
+                        >
+                            <FiHeart className="text-xl" />
+                            <span className="hidden lg:block text-sm font-medium">
+                                Wishlist
+                            </span>
+                        </Link>
+
+                        <Link
+                            to="/cart"
+                            className="flex items-center gap-2 hover:text-[#7652A5] transition"
+                            title="Cart"
+                        >
+                            <FiShoppingCart className="text-xl" />
+                            <span className="hidden lg:block text-sm font-medium">
+                                Cart
+                            </span>
+                        </Link>
+
+                        {/* Mobile Menu Button */}
+                        <button
+                            className="md:hidden text-xl text-[#7652A5] hover:text-[#5E3F89] transition"
+                            onClick={() => setMenuOpen(!menuOpen)}
+                            aria-label="Toggle navigation"
+                        >
+                            {menuOpen ? <FiX /> : <FiMenu />}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Category Navigation */}
+                <nav className="hidden md:flex items-center justify-center gap-7 border-t border-[#F0EBF5] py-2.5 text-[13px] font-medium text-[#5B5364]">
+                    {navLinks.map((link) => (
+                        <Link
+                            key={link.name}
+                            to={link.href}
+                            className="relative py-1 hover:text-[#7652A5] transition-colors after:absolute after:left-0 after:-bottom-0.5 after:w-0 after:h-[2px] after:bg-[#7652A5] after:rounded-full hover:after:w-full after:transition-all"
+                        >
+                            {link.name}
+                        </Link>
+                    ))}
+                </nav>
+
+                {/* Mobile Menu */}
+                {menuOpen && (
+                    <div className="md:hidden border-t border-[#EEE8F5] py-4">
+
+                        {/* Mobile Search */}
                         <form
                             onSubmit={handleSearch}
-                            className="hidden md:flex flex-1 max-w-xl items-center bg-[#F8F6FB] border border-[#E9E0F5] rounded-full px-5 py-3 focus-within:border-[#7652A5] transition"
+                            className="flex items-center bg-[#F8F6FB] border border-[#E9E0F5] rounded-lg px-3 py-2.5 mb-4 focus-within:border-[#7652A5]"
                         >
+                            <FiSearch className="text-[#7652A5] shrink-0" />
+
                             <input
                                 type="text"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Search for products, brands..."
-                                className="bg-transparent outline-none text-sm text-[#30283B] placeholder-[#9992A4] w-full"
+                                placeholder="Search products..."
+                                className="bg-transparent outline-none ml-3 w-full text-sm text-[#30283B] placeholder-[#9992A4]"
                             />
-
-                            <button type="submit" aria-label="Search">
-                                <FiSearch className="text-xl text-[#7652A5]" />
-                            </button>
                         </form>
 
-                        {/* Action icons */}
-                        <div className="flex items-center gap-4 md:gap-7">
-
-                            <Link to="/login" className="flex flex-col items-center hover:text-[#7652A5] transition">
-                                <FiUser className="text-xl md:text-2xl" />
-                                <span className="hidden lg:block text-[11px] mt-1">Account</span>
-                            </Link>
-
-                            <Link to="/wishlist" className="flex flex-col items-center hover:text-[#7652A5] transition">
-                                <FiHeart className="text-xl md:text-2xl" />
-                                <span className="hidden lg:block text-[11px] mt-1">Wishlist</span>
-                            </Link>
-
-                            <Link to="/cart" className="flex flex-col items-center hover:text-[#7652A5] transition relative">
-                                <FiShoppingCart className="text-xl md:text-2xl" />
-                                <span className="hidden lg:block text-[11px] mt-1">Cart</span>
-                            </Link>
-
-                            <button
-                                className="md:hidden text-2xl text-[#7652A5]"
-                                onClick={() => setMenuOpen(!menuOpen)}
-                                aria-label="Toggle navigation"
-                            >
-                                {menuOpen ? <FiX /> : <FiMenu />}
-                            </button>
-
+                        {/* Mobile Links */}
+                        <div className="grid grid-cols-2 gap-x-5 gap-y-3 text-sm font-medium">
+                            {navLinks.map((link) => (
+                                <Link
+                                    key={link.name}
+                                    to={link.href}
+                                    onClick={() => setMenuOpen(false)}
+                                    className="py-1.5 hover:text-[#7652A5] transition"
+                                >
+                                    {link.name}
+                                </Link>
+                            ))}
                         </div>
+
+                        {/* Mobile Account */}
+                        <Link
+                            to={isAuthenticated ? "/profile" : "/login"}
+                            onClick={() => setMenuOpen(false)}
+                            className="flex items-center gap-2 mt-4 pt-4 border-t border-[#EEE8F5] text-sm font-semibold text-[#7652A5]"
+                        >
+                            <FiUser />
+                            {isAuthenticated
+                                ? user?.name || user?.phone || "My Account"
+                                : "Login / My Account"}
+                        </Link>
                     </div>
-
-                    {/* Category navigation */}
-                    <nav className="hidden md:flex justify-center items-center gap-8 py-4 border-t border-[#EEE8F5] text-sm font-medium">
-                        {navLinks.map((link) => (
-                            <Link
-                                key={link.name}
-                                to={link.href}
-                                className="hover:text-[#7652A5] transition"
-                            >
-                                {link.name}
-                            </Link>
-                        ))}
-                    </nav>
-
-                    {/* Mobile navigation */}
-                    {menuOpen && (
-                        <div className="md:hidden pb-5 border-t border-[#EEE8F5]">
-
-                            <form
-                                onSubmit={handleSearch}
-                                className="flex items-center bg-[#F8F6FB] border border-[#E9E0F5] rounded-lg px-4 py-3 mt-4"
-                            >
-                                <FiSearch className="text-[#7652A5]" />
-                                <input
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    placeholder="Search products..."
-                                    className="bg-transparent outline-none ml-3 w-full text-sm text-[#30283B] placeholder-[#9992A4]"
-                                />
-                            </form>
-
-                            <div className="flex flex-col mt-4 gap-4 text-sm">
-                                {navLinks.map((link) => (
-                                    <Link
-                                        key={link.name}
-                                        to={link.href}
-                                        onClick={() => setMenuOpen(false)}
-                                        className="hover:text-[#7652A5] transition"
-                                    >
-                                        {link.name}
-                                    </Link>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                </div>
-            </header>
-        </>
+                )}
+            </div>
+        </header>
     );
 };
 

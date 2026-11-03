@@ -1,164 +1,303 @@
-import { useState } from 'react';
-import { FiArrowRight, FiCheckCircle } from 'react-icons/fi';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
 
-export default function Login() {
-    const [step, setStep] = useState(1); // 1 = Phone Input, 2 = OTP Input
-    const [phone, setPhone] = useState('');
-    const [otp, setOtp] = useState(['', '', '', '', '', '']);
-    const [loading, setLoading] = useState(false);
-    const { loginWithToken } = useAuth();
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import API from "../../utils/api";
+
+function Login() {
     const navigate = useNavigate();
+    const { loginWithToken } = useAuth();
 
-    // Step 1: Request OTP
-    const handleSendOtp = (e) => {
-        e.preventDefault();
-        if (phone.length < 10) return;
+    const [role, setRole] = useState("CUSTOMER");
+    const [phone, setPhone] = useState("");
+    const [otp, setOtp] = useState("");
+    const [otpSent, setOtpSent] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-        setLoading(true);
-        // Simulated API call matching backend: POST /api/auth/send-otp
-        setTimeout(() => {
+    const isValidPhone = /^[6-9]\d{9}$/.test(phone);
+
+    const sendOtp = async (event) => {
+        event?.preventDefault();
+
+        if (!isValidPhone) {
+            toast.error("Please enter a valid 10-digit phone number");
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            const endpoint =
+                role === "CUSTOMER"
+                    ? "/auth/login"
+                    : "/auth/seller-login";
+
+            await API.post(endpoint, { phone });
+
+            setOtpSent(true);
+            setOtp("");
+            toast.success("OTP sent successfully!");
+        } catch (error) {
+            toast.error(
+                error.response?.data?.message ||
+                "Unable to send OTP. Please try again."
+            );
+        } finally {
             setLoading(false);
-            setStep(2);
-        }, 800);
-    };
-
-    // Step 2: Handle OTP input digit progression
-    const handleOtpChange = (element, index) => {
-        if (isNaN(Number(element.value))) return false;
-
-        const newOtp = [...otp];
-        newOtp[index] = element.value;
-        setOtp(newOtp);
-
-        // Auto-focus next input field
-        if (element.nextSibling && element.value !== '') {
-            element.nextSibling.focus();
         }
     };
 
-    // Verify OTP & Complete Login
-    const handleVerifyOtp = (e) => {
-        e.preventDefault();
-        const otpCode = otp.join('');
-        if (otpCode.length < 6) return;
+    const verifyOtp = async (event) => {
+        event.preventDefault();
 
-        setLoading(true);
-        // Simulated API response matching backend authController/authService
-        setTimeout(() => {
-            setLoading(false);
-            loginWithToken('mock-jwt-token-12345', {
-                id: 1,
+        if (!/^\d{6}$/.test(otp)) {
+            toast.error("Please enter a valid 6-digit OTP");
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            const endpoint =
+                role === "CUSTOMER"
+                    ? "/auth/verify-otp"
+                    : "/auth/seller-verify-otp";
+
+            const response = await API.post(endpoint, {
                 phone,
-                role: 'CUSTOMER',
-                isVerified: true
+                otp,
             });
-            navigate('/');
-        }, 1000);
+
+            // Handles the nested response structure from your responseHandler.
+            let result = response.data;
+
+            while (
+                result?.data &&
+                typeof result.data === "object" &&
+                !result.token
+            ) {
+                result = result.data;
+            }
+
+            const { token, user } = result;
+
+            if (!token || !user) {
+                throw new Error("Invalid login response from server");
+            }
+
+            loginWithToken(token, user);
+            toast.success("Login successful!");
+
+            // Both roles currently return to Home.
+            // We can add a separate seller dashboard route later.
+            navigate("/");
+        } catch (error) {
+            toast.error(
+                error.response?.data?.message ||
+                error.message ||
+                "OTP verification failed"
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const changePhone = () => {
+        setOtpSent(false);
+        setOtp("");
     };
 
     return (
-        <div className="min-h-[80vh] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
-            <div className="max-w-md w-full bg-white p-8 rounded-2xl border border-gray-200 shadow-xs space-y-6">
+        <div className="min-h-screen bg-[#F8F6FB] flex items-center justify-center px-4 py-10">
 
-                {/* Header */}
-                <div className="text-center">
-                    <Link to="/" className="text-3xl font-extrabold text-indigo-600 tracking-tight">
-                        ShopCart
+            <div className="w-full max-w-5xl bg-white rounded-3xl shadow-xl overflow-hidden grid md:grid-cols-2">
+
+                {/* Left Section */}
+                <div className="hidden md:flex flex-col justify-between bg-gradient-to-br from-[#30283B] via-[#7652A5] to-[#9B7BC2] p-12 text-white">
+
+                    <Link to="/" className="text-3xl font-bold tracking-wide">
+                        Shop<span className="text-[#E9E0F5]">Cart.</span>
                     </Link>
-                    <h2 className="text-xl font-bold text-gray-900 mt-4">
-                        {step === 1 ? 'Welcome Back' : 'Verify Mobile Number'}
-                    </h2>
-                    <p className="text-sm text-gray-500 mt-1">
-                        {step === 1
-                            ? 'Enter your 10-digit phone number to receive a one-time password (OTP)'
-                            : `We sent a 6-digit code to +91 ${phone}`}
+
+                    <div>
+                        <div className="w-16 h-1 bg-[#E9E0F5] rounded-full mb-7" />
+
+                        <h1 className="text-4xl font-bold leading-tight mb-5">
+                            Shopping made simple.
+                        </h1>
+
+                        <p className="text-white/80 leading-7 text-base">
+                            Sign in to explore products, discover great deals
+                            and enjoy a seamless shopping experience with ShopCart.
+                        </p>
+                    </div>
+
+                    <p className="text-sm text-white/70">
+                        Your shopping journey starts here.
                     </p>
                 </div>
 
-                {/* Step 1: Phone Input Form */}
-                {step === 1 && (
-                    <form onSubmit={handleSendOtp} className="space-y-4">
-                        <div>
-                            <label className="block text-xs font-semibold text-gray-600 mb-1">Mobile Phone Number</label>
-                            <div className="relative">
-                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-gray-500 font-medium">
+                {/* Right Section */}
+                <div className="p-7 sm:p-10 md:p-12">
+
+                    <div className="mb-8">
+                        <Link
+                            to="/"
+                            className="text-2xl font-bold text-[#7652A5] md:hidden"
+                        >
+                            ShopCart.
+                        </Link>
+
+                        <p className="text-sm font-semibold text-[#7652A5] mt-5 mb-2">
+                            WELCOME BACK
+                        </p>
+
+                        <h2 className="text-3xl font-bold text-[#30283B]">
+                            Login to your account
+                        </h2>
+
+                        <p className="text-[#77717F] text-sm mt-3">
+                            Enter your phone number to continue.
+                        </p>
+                    </div>
+
+                    {/* Role Selection */}
+                    <div className="mb-7">
+                        <label className="block text-sm font-semibold text-[#30283B] mb-3">
+                            Login as
+                        </label>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                type="button"
+                                disabled={loading}
+                                onClick={() => {
+                                    setRole("CUSTOMER");
+                                    changePhone();
+                                }}
+                                className={`py-3 rounded-xl border font-semibold transition ${role === "CUSTOMER"
+                                        ? "bg-[#7652A5] text-white border-[#7652A5]"
+                                        : "bg-white text-[#77717F] border-[#E9E0F5] hover:border-[#7652A5]"
+                                    }`}
+                            >
+                                Customer
+                            </button>
+
+                            <button
+                                type="button"
+                                disabled={loading}
+                                onClick={() => {
+                                    setRole("SELLER");
+                                    changePhone();
+                                }}
+                                className={`py-3 rounded-xl border font-semibold transition ${role === "SELLER"
+                                        ? "bg-[#7652A5] text-white border-[#7652A5]"
+                                        : "bg-white text-[#77717F] border-[#E9E0F5] hover:border-[#7652A5]"
+                                    }`}
+                            >
+                                Seller
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Phone Number Form */}
+                    <form onSubmit={otpSent ? verifyOtp : sendOtp}>
+
+                        <div className="mb-5">
+                            <label className="block text-sm font-semibold text-[#30283B] mb-2">
+                                Phone Number
+                            </label>
+
+                            <div className="flex items-center border border-[#E9E0F5] rounded-xl overflow-hidden focus-within:border-[#7652A5] focus-within:ring-2 focus-within:ring-[#7652A5]/10">
+                                <span className="px-4 py-3.5 bg-[#F8F6FB] text-[#30283B] border-r border-[#E9E0F5]">
                                     +91
                                 </span>
+
                                 <input
                                     type="tel"
-                                    required
-                                    maxLength="10"
                                     value={phone}
-                                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                                    placeholder="9876543210"
-                                    className="w-full bg-gray-50 border border-gray-300 rounded-xl pl-12 pr-4 py-3 text-sm font-semibold tracking-wide focus:outline-none focus:border-indigo-500 focus:bg-white"
+                                    onChange={(e) =>
+                                        setPhone(
+                                            e.target.value.replace(/\D/g, "").slice(0, 10)
+                                        )
+                                    }
+                                    placeholder="Enter your phone number"
+                                    disabled={otpSent || loading}
+                                    className="w-full px-4 py-3.5 outline-none text-[#30283B] disabled:bg-gray-50"
                                 />
                             </div>
                         </div>
 
-                        <button
-                            type="submit"
-                            disabled={phone.length < 10 || loading}
-                            className="w-full bg-indigo-600 text-white font-bold py-3.5 px-4 rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition flex items-center justify-center space-x-2 shadow-md"
-                        >
-                            <span>{loading ? 'Sending OTP...' : 'Get OTP'}</span>
-                            <FiArrowRight />
-                        </button>
-                    </form>
-                )}
+                        {otpSent && (
+                            <div className="mb-5">
+                                <label className="block text-sm font-semibold text-[#30283B] mb-2">
+                                    Enter OTP
+                                </label>
 
-                {/* Step 2: OTP Verification Form */}
-                {step === 2 && (
-                    <form onSubmit={handleVerifyOtp} className="space-y-6">
-                        <div className="flex justify-between gap-2">
-                            {otp.map((digit, index) => (
                                 <input
-                                    key={index}
                                     type="text"
-                                    maxLength="1"
-                                    value={digit}
-                                    onChange={(e) => handleOtpChange(e.target, index)}
-                                    onFocus={(e) => e.target.select()}
-                                    className="w-12 h-12 text-center text-lg font-bold border border-gray-300 rounded-xl bg-gray-50 focus:outline-none focus:border-indigo-600 focus:bg-white focus:ring-2 focus:ring-indigo-100 transition"
+                                    inputMode="numeric"
+                                    autoComplete="one-time-code"
+                                    maxLength={6}
+                                    value={otp}
+                                    onChange={(e) =>
+                                        setOtp(
+                                            e.target.value.replace(/\D/g, "").slice(0, 6)
+                                        )
+                                    }
+                                    placeholder="Enter 6-digit OTP"
+                                    className="w-full px-4 py-3.5 border border-[#E9E0F5] rounded-xl outline-none focus:border-[#7652A5] focus:ring-2 focus:ring-[#7652A5]/10 tracking-[0.5em] text-center text-lg"
                                 />
-                            ))}
-                        </div>
+
+                                <button
+                                    type="button"
+                                    onClick={changePhone}
+                                    disabled={loading}
+                                    className="text-sm text-[#7652A5] font-semibold mt-3 hover:text-[#5E3F89]"
+                                >
+                                    Change phone number
+                                </button>
+                            </div>
+                        )}
 
                         <button
                             type="submit"
-                            disabled={otp.join('').length < 6 || loading}
-                            className="w-full bg-indigo-600 text-white font-bold py-3.5 px-4 rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition flex items-center justify-center space-x-2 shadow-md"
+                            disabled={loading || (!otpSent && !isValidPhone)}
+                            className="w-full bg-[#7652A5] hover:bg-[#5E3F89] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3.5 rounded-xl transition shadow-md shadow-[#7652A5]/20"
                         >
-                            <FiCheckCircle />
-                            <span>{loading ? 'Verifying...' : 'Verify & Continue'}</span>
+                            {loading
+                                ? "Please wait..."
+                                : otpSent
+                                    ? "Verify OTP & Login"
+                                    : "Send OTP"}
                         </button>
-
-                        <div className="flex items-center justify-between text-xs text-gray-500 pt-2">
-                            <button
-                                type="button"
-                                onClick={() => setStep(1)}
-                                className="text-indigo-600 font-semibold hover:underline"
-                            >
-                                Change Phone Number
-                            </button>
-                            <button
-                                type="button"
-                                onClick={handleSendOtp}
-                                className="text-gray-600 font-semibold hover:text-indigo-600"
-                            >
-                                Resend OTP
-                            </button>
-                        </div>
                     </form>
-                )}
 
-                {/* Footer Note */}
-                <p className="text-xs text-center text-gray-400">
-                    By continuing, you agree to ShopCart's Terms of Service and Privacy Policy.
-                </p>
+                    {otpSent && (
+                        <div className="text-center mt-5">
+                            <p className="text-sm text-[#77717F]">
+                                Didn't receive the OTP?{" "}
+                                <button
+                                    type="button"
+                                    onClick={sendOtp}
+                                    disabled={loading}
+                                    className="text-[#7652A5] font-semibold hover:underline disabled:opacity-50"
+                                >
+                                    Resend OTP
+                                </button>
+                            </p>
+                        </div>
+                    )}
+
+                    <p className="text-center text-xs text-[#77717F] mt-8">
+                        By continuing, you agree to ShopCart's terms and privacy policy.
+                    </p>
+
+                </div>
             </div>
         </div>
     );
 }
+
+export default Login;
