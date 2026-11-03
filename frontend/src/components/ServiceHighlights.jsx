@@ -32,7 +32,7 @@ const ServiceHighlights = () => {
     return (
         <section className="max-w-7xl mx-auto px-5 lg:px-8 pb-16">
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 bg-[#365D52] rounded-2xl px-5 py-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 bg-[#7652A5] rounded-2xl px-5 py-8">
 
                 {services.map((service, index) => {
                     const Icon = service.icon;
@@ -45,8 +45,8 @@ const ServiceHighlights = () => {
                             }`}
                         >
 
-                            <div className="bg-[#D98968]/20 p-3 rounded-xl">
-                                <Icon className="text-[#F2B49A] text-2xl" />
+                            <div className="bg-[#E9E0F5]/20 p-3 rounded-xl">
+                                <Icon className="text-[#E9E0F5] text-2xl" />
                             </div>
 
                             <div>
@@ -54,7 +54,7 @@ const ServiceHighlights = () => {
                                     {service.title}
                                 </h3>
 
-                                <p className="text-[#D5DED8] text-[10px] md:text-xs mt-1">
+                                <p className="text-[#E9E0F5] text-[10px] md:text-xs mt-1">
                                     {service.description}
                                 </p>
                             </div>

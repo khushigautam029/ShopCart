@@ -18,6 +18,7 @@
         --color-muted: #77717F;
     }
 
+    /* Fixed invalid dash selector to universal selector */
     * {
         margin: 0;
         padding: 0;
@@ -26,13 +27,26 @@
 
     html {
         scroll-behavior: smooth;
+        width: 100%;
+        height: 100%;
     }
 
     body {
-        min-width: 320px;
+        width: 100%;
         min-height: 100vh;
+        margin: 0;
+        padding: 0;
         background-color: #FFFFFF;
         color: #30283B;
+        overflow-x: hidden;
+    }
+
+    /* Ensures your main root wrapper expands to fill the screen */
+    #root, #app {
+        width: 100%;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
     }
 
     button,
