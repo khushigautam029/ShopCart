@@ -4,9 +4,10 @@ import Login from './pages/auth/Login';
 import Cart from './pages/customer/Cart';
 import CategoriesDeals from './pages/customer/CategoriesDeals';
 import Checkout from './pages/customer/Checkout';
-import Home from './pages/customer/home';
+import Home from './pages/customer/Home';
 import ProductDetail from './pages/customer/ProductDetail';
 import ProductListing from './pages/customer/ProductListing';
+import Wishlist from './pages/customer/Wishlist';
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="cart" element={<Cart />} />
           <Route path="checkout" element={<Checkout />} />
           <Route path="categories" element={<CategoriesDeals/>} />
+          <Route path="wishlist" element={<Wishlist/>} />
         </Route>
       </Routes>
     </BrowserRouter>

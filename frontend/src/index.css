@@ -1,1 +1,43 @@
 @import "tailwindcss";
+
+:root {
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    color: #172554;
+    background: #ffffff;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    min-width: 320px;
+    min-height: 100vh;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+::selection {
+    background: #2563eb;
+    color: white;
+}
