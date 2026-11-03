@@ -1,3 +1,4 @@
+
 import {
     FiHeadphones,
     FiRefreshCw,
@@ -30,9 +31,9 @@ const services = [
 
 const ServiceHighlights = () => {
     return (
-        <section className="max-w-7xl mx-auto px-5 lg:px-8 pb-16">
+        <section className="w-full px-0 py-0">
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 bg-[#7652A5] rounded-2xl px-5 py-8">
+            <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-y-4 bg-[#7652A5] px-4 sm:px-6 py-5 sm:py-6">
 
                 {services.map((service, index) => {
                     const Icon = service.icon;
@@ -40,25 +41,22 @@ const ServiceHighlights = () => {
                     return (
                         <div
                             key={service.title}
-                            className={`flex items-center gap-4 justify-center ${
-                                index !== 3 ? "lg:border-r border-white/15" : ""
-                            }`}
+                            className={`flex items-center justify-center gap-3 ${index % 2 === 0 ? "lg:border-r border-white/20" : ""
+                                }`}
                         >
-
-                            <div className="bg-[#E9E0F5]/20 p-3 rounded-xl">
-                                <Icon className="text-[#E9E0F5] text-2xl" />
+                            <div className="bg-[#E9E0F5]/20 p-2.5 rounded-lg shrink-0">
+                                <Icon className="text-[#E9E0F5] text-xl" />
                             </div>
 
                             <div>
-                                <h3 className="text-white font-bold text-xs md:text-sm">
+                                <h3 className="text-white font-semibold text-xs sm:text-sm">
                                     {service.title}
                                 </h3>
 
-                                <p className="text-[#E9E0F5] text-[10px] md:text-xs mt-1">
+                                <p className="text-[#E9E0F5] text-[10px] sm:text-xs mt-0.5">
                                     {service.description}
                                 </p>
                             </div>
-
                         </div>
                     );
                 })}
