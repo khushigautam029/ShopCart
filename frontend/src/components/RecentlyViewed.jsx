@@ -91,7 +91,7 @@ const RecentlyViewed = () => {
                     </div>
 
                     <h2 className="text-2xl md:text-3xl font-bold text-[#30283B]">
-                        Continue Where You Left Off
+                        Recently Viewed
                     </h2>
 
                     <p className="text-sm text-[#77717F] mt-2">

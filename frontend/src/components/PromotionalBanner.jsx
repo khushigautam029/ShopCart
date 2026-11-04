@@ -1,54 +1,53 @@
-
 import { FiArrowRight, FiTag, FiZap } from "react-icons/fi";
 import { Link } from "react-router-dom";
 
 const PromotionalBanner = () => {
     return (
-        <section className="w-full px-4 sm:px-6 lg:px-8 py-10 md:py-14">
-            <div className="relative isolate overflow-hidden rounded-3xl bg-gradient-to-br from-[#30283B] via-[#5E3F89] to-[#7652A5] min-h-[340px] md:min-h-[390px] flex items-center shadow-xl shadow-[#7652A5]/15">
+        <section className="w-full px-3 sm:px-5 lg:px-6 py-5 md:py-7">
+            <div className="relative isolate overflow-hidden rounded-2xl bg-gradient-to-br from-[#30283B] via-[#5E3F89] to-[#7652A5] min-h-[230px] md:min-h-[250px] flex items-center shadow-lg shadow-[#7652A5]/10">
 
-                {/* Background decorations */}
-                <div className="absolute -top-32 -right-20 w-80 h-80 rounded-full border-[45px] border-white/[0.06]" />
+                {/* Background Decorations */}
+                <div className="absolute -top-24 -right-12 w-60 h-60 rounded-full border-[30px] border-white/[0.06]" />
 
-                <div className="absolute -bottom-40 left-1/3 w-96 h-96 rounded-full bg-[#C9B2E8]/15 blur-3xl" />
+                <div className="absolute -bottom-32 left-1/3 w-72 h-72 rounded-full bg-[#C9B2E8]/10 blur-3xl" />
 
-                <div className="absolute top-10 right-[35%] w-3 h-3 rounded-full bg-[#E9E0F5]/40" />
-                <div className="absolute bottom-16 left-[45%] w-2 h-2 rounded-full bg-white/40" />
+                <div className="absolute top-8 right-[35%] w-2 h-2 rounded-full bg-[#E9E0F5]/40" />
 
                 {/* Content */}
-                <div className="relative z-10 w-full md:w-[58%] px-6 py-12 sm:px-10 md:px-12 lg:px-16">
+                <div className="relative z-20 w-full md:w-[62%] px-5 py-7 sm:px-8 md:px-9 lg:px-11">
 
-                    {/* Offer label */}
-                    <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 backdrop-blur-sm text-[#E9E0F5] px-4 py-2 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-[2px]">
-                        <FiZap className="text-[#E9E0F5] text-sm" />
+                    {/* Offer Label */}
+                    <div className="inline-flex items-center gap-1.5 bg-white/10 border border-white/15 text-[#E9E0F5] px-3 py-1.5 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-[1.5px]">
+                        <FiZap size={12} />
                         Limited Time Offer
                     </div>
 
                     {/* Heading */}
-                    <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-[1.1] mt-6">
-                        Upgrade Your
-                        <span className="block text-[#E9E0F5] mt-1">
+                    <h2 className="text-2xl sm:text-3xl lg:text-[38px] font-extrabold text-white leading-tight mt-3">
+                        Upgrade Your{" "}
+                        <span className="text-[#E9E0F5]">
                             Style for Less.
                         </span>
                     </h2>
 
                     {/* Discount */}
-                    <div className="flex items-center gap-3 mt-5">
-                        <span className="text-5xl sm:text-6xl font-black text-white">
+                    <div className="flex items-center gap-2.5 mt-3">
+                        <span className="text-4xl sm:text-5xl font-black text-white leading-none">
                             50%
                         </span>
 
                         <div className="flex flex-col">
-                            <span className="text-[#E9E0F5] text-xl font-extrabold tracking-wide">
+                            <span className="text-[#E9E0F5] text-base font-extrabold">
                                 OFF
                             </span>
-                            <span className="text-white/70 text-xs font-medium">
+                            <span className="text-white/70 text-[10px] sm:text-xs">
                                 Selected products
                             </span>
                         </div>
                     </div>
 
-                    <p className="text-white/75 text-sm sm:text-base mt-4 max-w-md leading-relaxed">
+                    {/* Description */}
+                    <p className="text-white/75 text-xs sm:text-sm mt-3 max-w-md leading-5">
                         Discover amazing deals on your favourite fashion,
                         electronics and lifestyle products.
                     </p>
@@ -56,38 +55,43 @@ const PromotionalBanner = () => {
                     {/* CTA */}
                     <Link
                         to="/products?deals=true"
-                        className="group inline-flex items-center justify-center gap-3 bg-white text-[#5E3F89] hover:bg-[#E9E0F5] px-7 py-3.5 rounded-full font-bold text-sm mt-7 transition-all duration-300 hover:shadow-lg hover:shadow-black/20 hover:-translate-y-1"
+                        className="group inline-flex items-center justify-center gap-2 bg-white text-[#5E3F89] hover:bg-[#E9E0F5] px-5 py-2.5 rounded-lg font-bold text-xs sm:text-sm mt-4 transition-all duration-300 hover:shadow-md"
                     >
-                        <FiTag className="text-base" />
+                        <FiTag size={14} />
                         Shop the Deal
-                        <FiArrowRight className="transition-transform duration-300 group-hover:translate-x-1" />
+                        <FiArrowRight
+                            size={14}
+                            className="transition-transform duration-300 group-hover:translate-x-1"
+                        />
                     </Link>
 
-                    <p className="text-white/50 text-[10px] sm:text-xs mt-4">
+                    <p className="text-white/50 text-[9px] sm:text-[10px] mt-2.5">
                         Don't miss out on these exclusive offers!
                     </p>
                 </div>
 
-                {/* Image section */}
-                <div className="hidden md:block absolute right-0 top-0 bottom-0 w-[42%] lg:w-[40%]">
+                {/* Image Section */}
+                <div className="hidden md:block absolute right-0 top-0 bottom-0 w-[40%] lg:w-[38%]">
 
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#5E3F89] via-transparent to-transparent z-10" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#5E3F89] via-[#5E3F89]/20 to-transparent z-10" />
 
                     <img
                         src="https://images.unsplash.com/photo-1607082349566-187342175e2f?w=900"
                         alt="Exclusive shopping deals"
-                        className="w-full h-full object-cover object-center opacity-90"
+                        className="w-full h-full object-cover object-center opacity-85"
                     />
 
-                    {/* Floating discount card */}
-                    <div className="absolute z-20 right-6 lg:right-10 top-8 bg-white/95 backdrop-blur-md rounded-2xl p-4 shadow-xl rotate-3">
-                        <p className="text-[#77717F] text-[10px] font-bold uppercase tracking-wider">
+                    {/* Floating Discount Card */}
+                    <div className="absolute z-20 right-5 lg:right-8 top-6 bg-white/95 backdrop-blur-md rounded-xl px-3 py-2.5 shadow-lg rotate-2">
+                        <p className="text-[#77717F] text-[9px] font-bold uppercase tracking-wider">
                             Special Offer
                         </p>
-                        <p className="text-[#7652A5] text-3xl font-black mt-1">
+
+                        <p className="text-[#7652A5] text-2xl font-black mt-0.5">
                             50% OFF
                         </p>
-                        <p className="text-[#30283B] text-xs font-medium mt-1">
+
+                        <p className="text-[#30283B] text-[10px] font-medium mt-0.5">
                             Shop more, save more!
                         </p>
                     </div>
