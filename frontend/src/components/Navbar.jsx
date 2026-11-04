@@ -5,6 +5,7 @@ import {
     FiLogOut,
     FiMapPin,
     FiMenu,
+    FiPackage,
     FiSearch,
     FiShoppingCart,
     FiTrash2,
@@ -228,6 +229,14 @@ const Navbar = () => {
                             <span className="hidden lg:block text-sm font-medium">
                                 Cart
                             </span>
+                        </Link>
+
+                        <Link
+                            to="/order"
+                            className="flex flex-nowrap items-center gap-2 whitespace-nowrap text-sm font-semibold text-[#51475E] hover:text-[#7652A5]"
+                        >
+                            <FiPackage size={18} className="shrink-0" />
+                            <span>Orders</span>
                         </Link>
 
                         {/* Mobile Menu Button */}

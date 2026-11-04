@@ -8,6 +8,7 @@ import Cart from "./pages/customer/Cart";
 import Checkout from "./pages/customer/Checkout";
 import Home from "./pages/customer/Home";
 import Login from "./pages/customer/Login";
+import Order from "./pages/customer/Order";
 import OrderSuccess from "./pages/customer/OrderSuccess";
 import Products from "./pages/customer/Product";
 import ProductDetail from "./pages/customer/ProductDetail";
@@ -31,6 +32,7 @@ function App() {
                                 <Route path="/checkout" element={<Checkout />} />
                                 <Route path="/profile" element={<Profile />} />
                                 <Route path="/order-success" element={<OrderSuccess />}/>
+                                <Route path="/order" element={<Order />} />
                             </Route>
                             <Route path="/login" element={<Login />} />
                         </Routes>
