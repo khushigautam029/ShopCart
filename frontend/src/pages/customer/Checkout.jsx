@@ -13,7 +13,8 @@ import {
   FiTag,
   FiTruck,
 } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useCart } from "../../context/CartContext";
 
 const initialAddresses = [
     {
@@ -38,26 +39,11 @@ const initialAddresses = [
     },
 ];
 
-const initialOrderItems = [
-    {
-        id: 1,
-        name: "Premium Casual Sneakers",
-        variant: "Size: 8 | White",
-        price: 2499,
-        quantity: 1,
-        image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300",
-    },
-    {
-        id: 2,
-        name: "Classic Women's Handbag",
-        variant: "Lavender",
-        price: 1899,
-        quantity: 2,
-        image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=300",
-    },
-];
-
 const Checkout = () => {
+    const navigate = useNavigate();
+
+    const { cartItems, subtotal } = useCart();
+
     const [addresses, setAddresses] = useState(initialAddresses);
     const [selectedAddress, setSelectedAddress] = useState(1);
     const [showAddressForm, setShowAddressForm] = useState(false);
@@ -74,23 +60,21 @@ const Checkout = () => {
 
     const [couponInput, setCouponInput] = useState("");
     const [appliedCoupon, setAppliedCoupon] = useState("");
-    const [discount, setDiscount] = useState(0);
 
     const [paymentMethod, setPaymentMethod] = useState("COD");
 
-    const [orderItems] = useState(initialOrderItems);
-
-    const subtotal = orderItems.reduce(
-        (total, item) => total + item.price * item.quantity,
-        0
-    );
-
-    // Demo coupon: SHOP10 gives 10% off, maximum ₹500.
     const shipping = subtotal >= 999 ? 0 : 79;
+
+    // Calculate discount from the current cart subtotal.
+    const discount =
+        appliedCoupon === "SHOP10"
+            ? Math.min(subtotal * 0.1, 500)
+            : 0;
+
     const total = subtotal - discount + shipping;
 
     const formatPrice = (price) =>
-        `₹${price.toLocaleString("en-IN")}`;
+        `₹${Number(price || 0).toLocaleString("en-IN")}`;
 
     const applyCoupon = () => {
         const code = couponInput.trim().toUpperCase();
@@ -101,9 +85,8 @@ const Checkout = () => {
         }
 
         if (code === "SHOP10") {
-            const amount = Math.min(subtotal * 0.1, 500);
-            setDiscount(amount);
             setAppliedCoupon(code);
+            setCouponInput(code);
             toast.success("Coupon applied successfully!");
         } else {
             toast.error("Invalid coupon code");
@@ -111,7 +94,6 @@ const Checkout = () => {
     };
 
     const removeCoupon = () => {
-        setDiscount(0);
         setAppliedCoupon("");
         setCouponInput("");
         toast.success("Coupon removed");
@@ -152,32 +134,75 @@ const Checkout = () => {
     };
 
     const placeOrder = () => {
-        if (!selectedAddress) {
+        if (cartItems.length === 0) {
+            toast.error("Your cart is empty");
+            navigate("/cart");
+            return;
+        }
+
+        const deliveryAddress = addresses.find(
+            (address) => address.id === selectedAddress
+        );
+
+        if (!deliveryAddress) {
             toast.error("Please select a delivery address");
             return;
         }
 
-        toast.success(
-            `Demo order placed using ${paymentMethod === "COD" ? "Cash on Delivery" : paymentMethod}!`
-        );
+        // Demo order details are passed to the success page.
+        const orderDetails = {
+            orderId: `SC${Date.now()}`,
+            items: cartItems,
+            address: deliveryAddress,
+            paymentMethod,
+            subtotal,
+            shipping,
+            discount,
+            total,
+            orderDate: new Date().toISOString(),
+        };
+
+        navigate("/order-success", {
+            state: { order: orderDetails },
+        });
     };
 
     const inputClass =
         "w-full border border-[#E9E0F5] rounded-xl px-4 py-3 text-sm text-[#30283B] outline-none focus:border-[#7652A5] focus:ring-2 focus:ring-[#E9E0F5]";
 
+    if (cartItems.length === 0) {
+        return (
+            <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center bg-[#F8F6FB]">
+                <FiShoppingBag className="text-5xl text-[#7652A5] mb-4" />
+                <h2 className="text-2xl font-bold text-[#30283B]">
+                    Your cart is empty
+                </h2>
+                <p className="text-[#77717F] mt-2 mb-5">
+                    Add products before proceeding to checkout.
+                </p>
+                <Link
+                    to="/products"
+                    className="bg-[#7652A5] text-white px-6 py-3 rounded-xl"
+                >
+                    Start Shopping
+                </Link>
+            </div>
+        );
+    }
+
     return (
-        <div className="min-h-screen bg-[#F8F6FB] py-8 sm:py-12">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen w-full bg-[#F8F6FB] py-6 sm:py-8">
+            <div className="w-full px-4 sm:px-6 lg:px-8">
 
                 <Link
                     to="/cart"
-                    className="inline-flex items-center gap-2 text-[#7652A5] hover:text-[#5E3F89] mb-6"
+                    className="inline-flex items-center gap-2 text-[#7652A5] hover:text-[#5E3F89] mb-5"
                 >
                     <FiArrowLeft />
                     Back to Cart
                 </Link>
 
-                <div className="mb-8">
+                <div className="mb-6">
                     <h1 className="text-3xl sm:text-4xl font-bold text-[#30283B]">
                         Checkout
                     </h1>
@@ -186,10 +211,10 @@ const Checkout = () => {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
                     {/* Left: Checkout Details */}
-                    <div className="lg:col-span-2 space-y-6">
+                    <div className="lg:col-span-2 space-y-5">
 
                         {/* Delivery Address */}
                         <section className="bg-white border border-[#E9E0F5] rounded-2xl p-5 sm:p-6">
@@ -209,6 +234,7 @@ const Checkout = () => {
                                 </div>
 
                                 <button
+                                    type="button"
                                     onClick={() => setShowAddressForm(!showAddressForm)}
                                     className="flex items-center gap-1 text-sm font-semibold text-[#7652A5] hover:text-[#5E3F89]"
                                 >
@@ -371,77 +397,55 @@ const Checkout = () => {
                             </div>
 
                             <div className="space-y-3">
-                                <label className={`flex items-center gap-4 p-4 border rounded-xl cursor-pointer transition ${
-                                    paymentMethod === "COD"
-                                        ? "border-[#7652A5] bg-[#F8F5FC]"
-                                        : "border-[#E9E0F5]"
-                                }`}>
-                                    <input
-                                        type="radio"
-                                        name="payment"
-                                        value="COD"
-                                        checked={paymentMethod === "COD"}
-                                        onChange={(e) => setPaymentMethod(e.target.value)}
-                                        className="accent-[#7652A5]"
-                                    />
-                                    <FiTruck className="text-[#7652A5] text-xl" />
-                                    <div>
-                                        <p className="font-semibold text-sm text-[#30283B]">
-                                            Cash on Delivery
-                                        </p>
-                                        <p className="text-xs text-[#77717F]">
-                                            Pay when your order arrives.
-                                        </p>
-                                    </div>
-                                </label>
-
-                                <label className={`flex items-center gap-4 p-4 border rounded-xl cursor-pointer transition ${
-                                    paymentMethod === "UPI"
-                                        ? "border-[#7652A5] bg-[#F8F5FC]"
-                                        : "border-[#E9E0F5]"
-                                }`}>
-                                    <input
-                                        type="radio"
-                                        name="payment"
-                                        value="UPI"
-                                        checked={paymentMethod === "UPI"}
-                                        onChange={(e) => setPaymentMethod(e.target.value)}
-                                        className="accent-[#7652A5]"
-                                    />
-                                    <FiSmartphone className="text-[#7652A5] text-xl" />
-                                    <div>
-                                        <p className="font-semibold text-sm text-[#30283B]">
-                                            UPI
-                                        </p>
-                                        <p className="text-xs text-[#77717F]">
-                                            Google Pay, PhonePe, Paytm, etc.
-                                        </p>
-                                    </div>
-                                </label>
-
-                                <label className={`flex items-center gap-4 p-4 border rounded-xl cursor-pointer transition ${
-                                    paymentMethod === "CARD"
-                                        ? "border-[#7652A5] bg-[#F8F5FC]"
-                                        : "border-[#E9E0F5]"
-                                }`}>
-                                    <input
-                                        type="radio"
-                                        name="payment"
-                                        value="CARD"
-                                        checked={paymentMethod === "CARD"}
-                                        onChange={(e) => setPaymentMethod(e.target.value)}
-                                        className="accent-[#7652A5]"
-                                    />
-                                    <FiCreditCard className="text-[#7652A5] text-xl" />
-                                    <div>
-                                        <p className="font-semibold text-sm text-[#30283B]">
-                                            Credit / Debit Card
-                                        </p>
-                                        <p className="text-xs text-[#77717F]">
-                                            Visa, Mastercard and more.
-                                        </p>
-                                    </div>
-                                </label>
+                                {[
+                                    {
+                                        value: "COD",
+                                        title: "Cash on Delivery",
+                                        description: "Pay when your order arrives.",
+                                        icon: <FiTruck />,
+                                    },
+                                    {
+                                        value: "UPI",
+                                        title: "UPI",
+                                        description: "Google Pay, PhonePe, Paytm, etc.",
+                                        icon: <FiSmartphone />,
+                                    },
+                                    {
+                                        value: "CARD",
+                                        title: "Credit / Debit Card",
+                                        description: "Visa, Mastercard and more.",
+                                        icon: <FiCreditCard />,
+                                    },
+                                ].map((method) => (
+                                    <label
+                                        key={method.value}
+                                        className={`flex items-center gap-4 p-4 border rounded-xl cursor-pointer transition ${
+                                            paymentMethod === method.value
+                                                ? "border-[#7652A5] bg-[#F8F5FC]"
+                                                : "border-[#E9E0F5]"
+                                        }`}
+                                    >
+                                        <input
+                                            type="radio"
+                                            name="payment"
+                                            value={method.value}
+                                            checked={paymentMethod === method.value}
+                                            onChange={(e) => setPaymentMethod(e.target.value)}
+                                            className="accent-[#7652A5]"
+                                        />
+                                        <span className="text-[#7652A5] text-xl">
+                                            {method.icon}
+                                        </span>
+                                        <div>
+                                            <p className="font-semibold text-sm text-[#30283B]">
+                                                {method.title}
+                                            </p>
+                                            <p className="text-xs text-[#77717F]">
+                                                {method.description}
+                                            </p>
+                                        </div>
+                                    </label>
+                                ))}
                             </div>
                         </section>
 
@@ -512,9 +516,9 @@ const Checkout = () => {
                             </h2>
 
                             <div className="space-y-4 mb-5">
-                                {orderItems.map((item) => (
-                                    <div key={item.id} className="flex gap-3">
-                                        <div className="relative">
+                                {cartItems.map((item) => (
+                                    <div key={item.itemKey} className="flex gap-3">
+                                        <div className="relative shrink-0">
                                             <img
                                                 src={item.image}
                                                 alt={item.name}
@@ -526,11 +530,8 @@ const Checkout = () => {
                                         </div>
 
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-semibold text-[#30283B] line-clamp-1">
+                                            <p className="text-sm font-semibold text-[#30283B] line-clamp-2">
                                                 {item.name}
-                                            </p>
-                                            <p className="text-xs text-[#77717F] mt-1">
-                                                {item.variant}
                                             </p>
                                             <p className="text-sm font-semibold text-[#30283B] mt-1">
                                                 {formatPrice(item.price * item.quantity)}
@@ -576,7 +577,7 @@ const Checkout = () => {
 
                             <div className="flex gap-2 items-start mt-5 text-xs text-[#77717F]">
                                 <FiShield className="text-[#7652A5] text-base shrink-0" />
-                                <p>Your checkout information is displayed for demonstration only. No real payment or order will be created.</p>
+                                <p>This is a demo checkout. No real payment or order is created.</p>
                             </div>
 
                             <Link

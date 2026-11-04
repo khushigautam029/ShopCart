@@ -1,5 +1,6 @@
 
 import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import {
     FiArrowLeft,
     FiArrowRight,
@@ -10,15 +11,19 @@ import {
     FiShield,
     FiShoppingCart,
     FiStar,
-    FiTruck
+    FiTruck,
 } from "react-icons/fi";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { addToRecentlyViewed } from "../../components/RecentlyViewed";
+import { useCart } from "../../context/CartContext";
 import { trendingProducts } from "../../data/homeData";
 
 const ProductDetail = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
+
+    const { addToCart } = useCart();
 
     const product = useMemo(
         () =>
@@ -100,26 +105,51 @@ const ProductDetail = () => {
             }))
         : [];
 
+    const availableStock =
+        product.stock ?? product.availableStock ?? Infinity;
+
+    const isOutOfStock = availableStock <= 0;
+
     const handleQuantity = (change) => {
-        setQuantity((current) => Math.max(1, current + change));
+        setQuantity((current) =>
+            Math.min(
+                availableStock,
+                Math.max(1, current + change)
+            )
+        );
     };
 
+    // Add product to the shared cart
     const handleAddToCart = () => {
-        // Cart integration will be connected to your cart context/API.
-        alert(`${quantity} item(s) selected. Cart functionality will be connected next.`);
+        if (isOutOfStock) {
+            toast.error("This product is currently out of stock.");
+            return;
+        }
+
+        addToCart(product, quantity);
+
+        toast.success(
+            `${quantity} ${quantity === 1 ? "item" : "items"} added to cart!`
+        );
     };
 
+    // Add product and go directly to checkout
     const handleBuyNow = () => {
-        // Checkout integration will be connected after cart functionality.
-        alert("Buy Now functionality will be connected with checkout.");
+        if (isOutOfStock) {
+            toast.error("This product is currently out of stock.");
+            return;
+        }
+
+        addToCart(product, quantity);
+        navigate("/checkout");
     };
 
     return (
         <div className="w-full bg-white">
 
             {/* Breadcrumb */}
-            <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-14 py-5 bg-[#FCFAFE]">
-                <div className="max-w-7xl mx-auto flex items-center gap-2 text-xs sm:text-sm text-[#9992A4]">
+            <div className="w-full px-4 sm:px-6 lg:px-8 py-3 bg-[#FCFAFE]">
+                <div className="w-full flex items-center gap-2 text-xs sm:text-sm text-[#9992A4]">
                     <Link to="/" className="hover:text-[#7652A5]">
                         Home
                     </Link>
@@ -138,13 +168,13 @@ const ProductDetail = () => {
                 </div>
             </div>
 
-            {/* Product details */}
-            <section className="w-full px-4 sm:px-6 lg:px-10 xl:px-14 py-8 md:py-12">
-                <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14">
+            {/* Product Details */}
+            <section className="w-full px-4 sm:px-6 lg:px-8 py-5 md:py-7">
+                <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
 
-                    {/* Image gallery */}
+                    {/* Image Gallery */}
                     <div>
-                        <div className="relative bg-[#F8F6FB] rounded-3xl overflow-hidden aspect-square">
+                        <div className="relative bg-[#F8F6FB] rounded-2xl overflow-hidden aspect-square max-h-[580px]">
                             {selectedImage ? (
                                 <img
                                     src={selectedImage}
@@ -158,7 +188,7 @@ const ProductDetail = () => {
                             )}
 
                             {product.discount > 0 && (
-                                <span className="absolute top-5 left-5 bg-[#7652A5] text-white px-4 py-2 rounded-full text-xs font-bold">
+                                <span className="absolute top-4 left-4 bg-[#7652A5] text-white px-3 py-1.5 rounded-full text-xs font-bold">
                                     {product.discount}% OFF
                                 </span>
                             )}
@@ -167,7 +197,7 @@ const ProductDetail = () => {
                                 type="button"
                                 onClick={() => setIsWishlisted(!isWishlisted)}
                                 aria-label="Toggle wishlist"
-                                className={`absolute top-5 right-5 w-11 h-11 rounded-full flex items-center justify-center shadow-md transition-colors ${
+                                className={`absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-colors ${
                                     isWishlisted
                                         ? "bg-[#7652A5] text-white"
                                         : "bg-white text-[#7652A5] hover:bg-[#7652A5] hover:text-white"
@@ -182,13 +212,13 @@ const ProductDetail = () => {
 
                         {/* Thumbnails */}
                         {images.length > 1 && (
-                            <div className="flex gap-3 mt-4 overflow-x-auto pb-2">
+                            <div className="flex gap-3 mt-3 overflow-x-auto pb-1">
                                 {images.map((image, index) => (
                                     <button
                                         key={`${image}-${index}`}
                                         type="button"
                                         onClick={() => setSelectedImage(image)}
-                                        className={`w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-xl overflow-hidden bg-[#F8F6FB] border-2 transition-all ${
+                                        className={`w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-xl overflow-hidden bg-[#F8F6FB] border-2 transition-all ${
                                             selectedImage === image
                                                 ? "border-[#7652A5]"
                                                 : "border-transparent hover:border-[#C9B2E8]"
@@ -205,23 +235,24 @@ const ProductDetail = () => {
                         )}
                     </div>
 
-                    {/* Product information */}
+                    {/* Product Information */}
                     <div className="flex flex-col">
-                        <p className="text-xs sm:text-sm font-bold text-[#7652A5] uppercase tracking-[2px]">
+                        <p className="text-xs sm:text-sm font-bold text-[#7652A5] uppercase tracking-wider">
                             {category}
                         </p>
 
-                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#30283B] mt-3 leading-tight">
+                        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#30283B] mt-2 leading-tight">
                             {product.name}
                         </h1>
 
                         {/* Rating */}
-                        <div className="flex flex-wrap items-center gap-3 mt-5">
-                            <div className="flex items-center gap-1 bg-[#FFF8E8] px-3 py-2 rounded-lg">
+                        <div className="flex flex-wrap items-center gap-3 mt-3">
+                            <div className="flex items-center gap-1 bg-[#FFF8E8] px-3 py-1.5 rounded-lg">
                                 <FiStar
                                     size={15}
                                     className="fill-amber-400 text-amber-400"
                                 />
+
                                 <span className="text-sm font-bold text-[#51475E]">
                                     {product.rating || "Not rated"}
                                 </span>
@@ -235,7 +266,7 @@ const ProductDetail = () => {
                         </div>
 
                         {/* Price */}
-                        <div className="flex items-center flex-wrap gap-3 mt-7">
+                        <div className="flex items-center flex-wrap gap-3 mt-5">
                             <span className="text-3xl font-extrabold text-[#7652A5]">
                                 ₹{Number(product.price).toLocaleString("en-IN")}
                             </span>
@@ -255,26 +286,26 @@ const ProductDetail = () => {
                             )}
                         </div>
 
-                        <p className="text-xs text-[#9992A4] mt-2">
+                        <p className="text-xs text-[#9992A4] mt-1">
                             Inclusive of all applicable taxes
                         </p>
 
-                        <div className="w-full h-px bg-[#EEE8F5] my-7" />
+                        <div className="w-full h-px bg-[#EEE8F5] my-5" />
 
                         {/* Description */}
                         <h2 className="text-base font-bold text-[#30283B] mb-2">
                             Product Description
                         </h2>
 
-                        <p className="text-sm leading-7 text-[#77717F]">
+                        <p className="text-sm leading-6 text-[#77717F]">
                             {product.description ||
                                 "Explore this product and discover its features and details. More product information will be available soon."}
                         </p>
 
                         {/* Attributes */}
                         {attributes.length > 0 && (
-                            <div className="mt-7">
-                                <h2 className="font-bold text-[#30283B] mb-4">
+                            <div className="mt-5">
+                                <h2 className="font-bold text-[#30283B] mb-3">
                                     Product Attributes
                                 </h2>
 
@@ -282,7 +313,7 @@ const ProductDetail = () => {
                                     {attributes.map((attribute, index) => (
                                         <div
                                             key={`${attribute.name}-${index}`}
-                                            className={`grid grid-cols-2 gap-3 px-4 py-3 text-sm ${
+                                            className={`grid grid-cols-2 gap-3 px-4 py-2.5 text-sm ${
                                                 index % 2 === 0
                                                     ? "bg-[#FCFAFE]"
                                                     : "bg-white"
@@ -301,9 +332,23 @@ const ProductDetail = () => {
                             </div>
                         )}
 
+                        {/* Stock */}
+                        <div className="mt-4">
+                            {isOutOfStock ? (
+                                <p className="text-sm font-semibold text-red-500">
+                                    Currently out of stock
+                                </p>
+                            ) : (
+                                <p className="text-sm font-semibold text-green-700">
+                                    <span className="inline-block w-2 h-2 bg-green-600 rounded-full mr-2" />
+                                    In Stock
+                                </p>
+                            )}
+                        </div>
+
                         {/* Quantity */}
-                        <div className="mt-7">
-                            <p className="text-sm font-bold text-[#30283B] mb-3">
+                        <div className="mt-4">
+                            <p className="text-sm font-bold text-[#30283B] mb-2">
                                 Quantity
                             </p>
 
@@ -311,8 +356,8 @@ const ProductDetail = () => {
                                 <button
                                     type="button"
                                     onClick={() => handleQuantity(-1)}
-                                    disabled={quantity <= 1}
-                                    className="w-11 h-11 flex items-center justify-center text-[#7652A5] hover:bg-[#F3ECFA] disabled:opacity-40"
+                                    disabled={quantity <= 1 || isOutOfStock}
+                                    className="w-10 h-10 flex items-center justify-center text-[#7652A5] hover:bg-[#F3ECFA] disabled:opacity-40"
                                 >
                                     <FiMinus />
                                 </button>
@@ -324,19 +369,21 @@ const ProductDetail = () => {
                                 <button
                                     type="button"
                                     onClick={() => handleQuantity(1)}
-                                    className="w-11 h-11 flex items-center justify-center text-[#7652A5] hover:bg-[#F3ECFA]"
+                                    disabled={quantity >= availableStock || isOutOfStock}
+                                    className="w-10 h-10 flex items-center justify-center text-[#7652A5] hover:bg-[#F3ECFA] disabled:opacity-40"
                                 >
                                     <FiPlus />
                                 </button>
                             </div>
                         </div>
 
-                        {/* Purchase buttons */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-7">
+                        {/* Purchase Buttons */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
                             <button
                                 type="button"
                                 onClick={handleAddToCart}
-                                className="flex items-center justify-center gap-2 bg-[#7652A5] hover:bg-[#5E3F89] text-white py-4 rounded-xl font-bold text-sm transition-all hover:shadow-lg hover:shadow-[#7652A5]/20"
+                                disabled={isOutOfStock}
+                                className="flex items-center justify-center gap-2 bg-[#7652A5] hover:bg-[#5E3F89] disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-bold text-sm transition-all"
                             >
                                 <FiShoppingCart size={18} />
                                 Add to Cart
@@ -345,31 +392,32 @@ const ProductDetail = () => {
                             <button
                                 type="button"
                                 onClick={handleBuyNow}
-                                className="flex items-center justify-center gap-2 border-2 border-[#7652A5] text-[#7652A5] hover:bg-[#F3ECFA] py-4 rounded-xl font-bold text-sm transition-all"
+                                disabled={isOutOfStock}
+                                className="flex items-center justify-center gap-2 border-2 border-[#7652A5] text-[#7652A5] hover:bg-[#F3ECFA] disabled:border-gray-300 disabled:text-gray-400 disabled:cursor-not-allowed py-3.5 rounded-xl font-bold text-sm transition-all"
                             >
                                 Buy Now
                                 <FiArrowRight size={17} />
                             </button>
                         </div>
 
-                        {/* Service benefits */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-7 border-t border-[#EEE8F5]">
-                            <div className="flex items-center gap-3">
-                                <FiTruck className="text-[#7652A5]" size={21} />
+                        {/* Service Benefits */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6 pt-5 border-t border-[#EEE8F5]">
+                            <div className="flex items-center gap-2">
+                                <FiTruck className="text-[#7652A5]" size={20} />
                                 <span className="text-xs font-semibold text-[#77717F]">
                                     Delivery Available
                                 </span>
                             </div>
 
-                            <div className="flex items-center gap-3">
-                                <FiShield className="text-[#7652A5]" size={21} />
+                            <div className="flex items-center gap-2">
+                                <FiShield className="text-[#7652A5]" size={20} />
                                 <span className="text-xs font-semibold text-[#77717F]">
                                     Secure Payment
                                 </span>
                             </div>
 
-                            <div className="flex items-center gap-3">
-                                <FiRefreshCw className="text-[#7652A5]" size={21} />
+                            <div className="flex items-center gap-2">
+                                <FiRefreshCw className="text-[#7652A5]" size={20} />
                                 <span className="text-xs font-semibold text-[#77717F]">
                                     Easy Returns
                                 </span>
@@ -379,9 +427,9 @@ const ProductDetail = () => {
                 </div>
             </section>
 
-            {/* Product information tabs */}
-            <section className="w-full px-4 sm:px-6 lg:px-10 xl:px-14 pb-12">
-                <div className="max-w-7xl mx-auto border border-[#EEE8F5] rounded-2xl overflow-hidden">
+            {/* Product Information Tabs */}
+            <section className="w-full px-4 sm:px-6 lg:px-8 pb-7">
+                <div className="w-full border border-[#EEE8F5] rounded-xl overflow-hidden">
                     <div className="flex border-b border-[#EEE8F5] overflow-x-auto">
                         {[
                             { id: "description", label: "Description" },
@@ -390,7 +438,7 @@ const ProductDetail = () => {
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`px-6 py-4 text-sm font-bold whitespace-nowrap transition-colors ${
+                                className={`px-5 py-3 text-sm font-bold whitespace-nowrap transition-colors ${
                                     activeTab === tab.id
                                         ? "text-[#7652A5] border-b-2 border-[#7652A5]"
                                         : "text-[#77717F] hover:text-[#7652A5]"
@@ -401,26 +449,26 @@ const ProductDetail = () => {
                         ))}
                     </div>
 
-                    <div className="p-5 sm:p-7">
+                    <div className="p-4 sm:p-5">
                         {activeTab === "description" ? (
                             <div>
-                                <h2 className="font-bold text-[#30283B] mb-3">
+                                <h2 className="font-bold text-[#30283B] mb-2">
                                     About {product.name}
                                 </h2>
 
-                                <p className="text-sm text-[#77717F] leading-7">
+                                <p className="text-sm text-[#77717F] leading-6">
                                     {product.description ||
                                         "Detailed product information will be available soon."}
                                 </p>
                             </div>
                         ) : (
                             <div>
-                                <h2 className="font-bold text-[#30283B] mb-4">
+                                <h2 className="font-bold text-[#30283B] mb-3">
                                     Product Specifications
                                 </h2>
 
                                 {attributes.length > 0 ? (
-                                    <div className="grid sm:grid-cols-2 gap-3">
+                                    <div className="grid sm:grid-cols-2 gap-2">
                                         {attributes.map((attribute, index) => (
                                             <div
                                                 key={`${attribute.name}-${index}`}
@@ -447,32 +495,30 @@ const ProductDetail = () => {
                 </div>
             </section>
 
-            {/* Recently viewed section */}
-            <section className="w-full px-4 sm:px-6 lg:px-10 xl:px-14 pb-14">
-                <div className="max-w-7xl mx-auto bg-[#F8F6FB] rounded-2xl p-6 sm:p-8">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div>
-                            <p className="text-xs font-bold uppercase tracking-wider text-[#7652A5]">
-                                Keep exploring
-                            </p>
+            {/* Recently Viewed */}
+            <section className="w-full px-4 sm:px-6 lg:px-8 pb-7">
+                <div className="w-full bg-[#F8F6FB] rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <p className="text-xs font-bold uppercase tracking-wider text-[#7652A5]">
+                            Keep exploring
+                        </p>
 
-                            <h2 className="text-xl sm:text-2xl font-extrabold text-[#30283B] mt-2">
-                                Your Shopping Journey
-                            </h2>
+                        <h2 className="text-lg font-extrabold text-[#30283B] mt-1">
+                            Your Shopping Journey
+                        </h2>
 
-                            <p className="text-sm text-[#77717F] mt-2">
-                                Your recently viewed products are saved for your next visit.
-                            </p>
-                        </div>
-
-                        <Link
-                            to="/products"
-                            className="inline-flex items-center gap-2 text-sm font-bold text-[#7652A5]"
-                        >
-                            Explore More
-                            <FiArrowRight />
-                        </Link>
+                        <p className="text-sm text-[#77717F] mt-1">
+                            Your recently viewed products are saved for your next visit.
+                        </p>
                     </div>
+
+                    <Link
+                        to="/products"
+                        className="inline-flex items-center gap-2 text-sm font-bold text-[#7652A5]"
+                    >
+                        Explore More
+                        <FiArrowRight />
+                    </Link>
                 </div>
             </section>
         </div>
