@@ -19,7 +19,7 @@ export const getAllProducts = async (filters = {}) => {
         categoryId,
         brand,
         gender,
-        size, // ADD THIS
+        size,
         discount,
         deliveryTime,
         minPrice,

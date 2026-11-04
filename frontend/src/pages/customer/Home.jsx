@@ -1,9 +1,7 @@
 
 import CategorySection from "../../components/CategorySection";
 import DealOfTheDay from "../../components/DealOfTheDay";
-import Footer from "../../components/Footer";
 import HeroSection from "../../components/HeroSection";
-import Navbar from "../../components/Navbar";
 import ProductSection from "../../components/ProductSection";
 import PromotionalBanner from "../../components/PromotionalBanner";
 import RecentlyViewed from "../../components/RecentlyViewed";
@@ -12,7 +10,7 @@ import ServiceHighlights from "../../components/ServiceHighlights";
 const Home = () => {
     return (
         <div className="min-h-screen bg-white">
-            <Navbar />
+            {/* <Navbar /> */}
             <main>
                 <HeroSection />
                 <CategorySection />
@@ -22,7 +20,7 @@ const Home = () => {
                 <DealOfTheDay />
                 <ServiceHighlights />
             </main>
-            <Footer />
+            {/* <Footer /> */}
         </div>
     );
 };
