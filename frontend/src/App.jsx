@@ -13,6 +13,7 @@ import OrderSuccess from "./pages/customer/OrderSuccess";
 import Products from "./pages/customer/Product";
 import ProductDetail from "./pages/customer/ProductDetail";
 import Profile from "./pages/customer/Profile";
+import Review from "./pages/customer/Review";
 import Wishlist from "./pages/customer/Wishlist";
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
                                 <Route path="/profile" element={<Profile />} />
                                 <Route path="/order-success" element={<OrderSuccess />}/>
                                 <Route path="/order" element={<Order />} />
+                                <Route path="/orders/:orderId/review" element={<Review />} />
                             </Route>
                             <Route path="/login" element={<Login />} />
                         </Routes>

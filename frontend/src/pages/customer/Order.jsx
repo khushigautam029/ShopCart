@@ -9,6 +9,7 @@ import {
     FiPackage,
     FiSearch,
     FiShoppingBag,
+    FiStar,
     FiTruck
 } from "react-icons/fi";
 import { Link } from "react-router-dom";
@@ -87,16 +88,16 @@ const TrackingTimeline = ({ status }) => {
                             {index !== ORDER_STEPS.length - 1 && (
                                 <div
                                     className={`absolute left-[11px] top-6 h-full w-0.5 ${index < currentStep
-                                            ? "bg-[#7652A5]"
-                                            : "bg-[#E9E1F0]"
+                                        ? "bg-[#7652A5]"
+                                        : "bg-[#E9E1F0]"
                                         }`}
                                 />
                             )}
 
                             <div
                                 className={`relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${completed
-                                        ? "border-[#7652A5] bg-[#7652A5] text-white"
-                                        : "border-[#DDD5E6] bg-white text-transparent"
+                                    ? "border-[#7652A5] bg-[#7652A5] text-white"
+                                    : "border-[#DDD5E6] bg-white text-transparent"
                                     }`}
                             >
                                 {completed && <FiCheck size={13} />}
@@ -105,10 +106,10 @@ const TrackingTimeline = ({ status }) => {
                             <div className="flex-1">
                                 <p
                                     className={`text-sm ${current
-                                            ? "font-bold text-[#7652A5]"
-                                            : completed
-                                                ? "font-semibold text-[#30283B]"
-                                                : "text-[#A49DAD]"
+                                        ? "font-bold text-[#7652A5]"
+                                        : completed
+                                            ? "font-semibold text-[#30283B]"
+                                            : "text-[#A49DAD]"
                                         }`}
                                 >
                                     {step}
@@ -272,15 +273,15 @@ const Order = () => {
                             key={filter}
                             onClick={() => setActiveFilter(filter)}
                             className={`flex shrink-0 items-center gap-2 rounded-lg px-3.5 py-2.5 text-xs font-semibold transition ${activeFilter === filter
-                                    ? "bg-[#7652A5] text-white"
-                                    : "border border-[#E9E1F0] bg-white text-[#77717F] hover:border-[#C9B2E8] hover:text-[#7652A5]"
+                                ? "bg-[#7652A5] text-white"
+                                : "border border-[#E9E1F0] bg-white text-[#77717F] hover:border-[#C9B2E8] hover:text-[#7652A5]"
                                 }`}
                         >
                             {filter}
                             <span
                                 className={`rounded-full px-1.5 py-0.5 text-[10px] ${activeFilter === filter
-                                        ? "bg-white/20 text-white"
-                                        : "bg-[#F3ECFA] text-[#7652A5]"
+                                    ? "bg-white/20 text-white"
+                                    : "bg-[#F3ECFA] text-[#7652A5]"
                                     }`}
                             >
                                 {getOrderCount(filter)}
@@ -384,6 +385,8 @@ const Order = () => {
                                             </div>
 
                                             <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+
+                                                {/* Track Order */}
                                                 <button
                                                     onClick={() =>
                                                         setExpandedOrder(
@@ -399,6 +402,18 @@ const Order = () => {
                                                         <FiChevronDown size={15} />
                                                     )}
                                                 </button>
+
+                                                {/* Write a Review - Only for Delivered Orders */}
+                                                {String(status).toUpperCase().replaceAll(" ", "_") === "DELIVERED" && (
+                                                    <Link
+                                                        to={`/orders/${order.orderId}/review`}
+                                                        className="flex items-center justify-center gap-2 rounded-lg bg-[#7652A5] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#5E3F89] transition-colors"
+                                                    >
+                                                        <FiStar size={14} />
+                                                        Write a Review
+                                                    </Link>
+                                                )}
+
                                             </div>
                                         </div>
 
