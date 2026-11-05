@@ -387,6 +387,14 @@ const Order = () => {
                                             <div className="flex flex-wrap items-center gap-2 lg:justify-end">
 
                                                 {/* Track Order */}
+                                                <Link
+                                                    to={`/orders/${order.orderId}/track`}
+                                                    className="flex items-center justify-center gap-2 rounded-lg bg-[#7652A5] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#5E3F89]"
+                                                >
+                                                    <FiTruck size={15} />
+                                                    Track Order
+                                                </Link>
+
                                                 <button
                                                     onClick={() =>
                                                         setExpandedOrder(

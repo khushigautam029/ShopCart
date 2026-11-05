@@ -149,7 +149,11 @@ const Checkout = () => {
       return;
     }
 
-    // Demo order details are passed to the success page.
+    const orderDate = new Date();
+
+    const estimatedDelivery = new Date(orderDate);
+    estimatedDelivery.setDate(estimatedDelivery.getDate() + 7);
+
     const orderDetails = {
       orderId: `SC${Date.now()}`,
       items: cartItems,
@@ -159,9 +163,29 @@ const Checkout = () => {
       shipping,
       discount,
       total,
-      orderDate: new Date().toISOString(),
+      orderDate: orderDate.toISOString(),
+
+      // Tracking information
+      status: "PLACED",
+
+      estimatedDelivery: estimatedDelivery.toISOString(),
+
+      shippingDetails: {
+        courier: null,
+        trackingNumber: null,
+        shippingMethod: "Standard Delivery",
+      },
+
+      statusHistory: [
+        {
+          status: "PLACED",
+          timestamp: orderDate.toISOString(),
+          description: "Your order has been placed successfully.",
+        },
+      ],
     };
 
+    console.log("Order before saving:", orderDetails);
     // Save order in browser storage
     const existingOrders = JSON.parse(
       localStorage.getItem("shopcart_orders") || "[]"
@@ -172,9 +196,20 @@ const Checkout = () => {
       JSON.stringify([orderDetails, ...existingOrders])
     );
 
+    const savedOrders = JSON.parse(
+      localStorage.getItem("shopcart_orders") || "[]"
+    );
+
+    console.log("Order after saving:", savedOrders[0]);
+
     navigate("/order-success", {
       state: { order: orderDetails },
     });
+
+    console.log("Order placed successfully:",orderDetails);
+    console.log("Order retrieved successfully");
+    console.log("order details:" , orderDetails[0]);
+
   };
 
   const inputClass =
@@ -260,8 +295,8 @@ const Checkout = () => {
                     type="button"
                     onClick={() => setSelectedAddress(address.id)}
                     className={`text-left border rounded-xl p-4 transition ${selectedAddress === address.id
-                        ? "border-[#7652A5] bg-[#F8F5FC] ring-1 ring-[#7652A5]"
-                        : "border-[#E9E0F5] hover:border-[#C9B2E8]"
+                      ? "border-[#7652A5] bg-[#F8F5FC] ring-1 ring-[#7652A5]"
+                      : "border-[#E9E0F5] hover:border-[#C9B2E8]"
                       }`}
                   >
                     <div className="flex justify-between items-center mb-3">
@@ -429,8 +464,8 @@ const Checkout = () => {
                   <label
                     key={method.value}
                     className={`flex items-center gap-4 p-4 border rounded-xl cursor-pointer transition ${paymentMethod === method.value
-                        ? "border-[#7652A5] bg-[#F8F5FC]"
-                        : "border-[#E9E0F5]"
+                      ? "border-[#7652A5] bg-[#F8F5FC]"
+                      : "border-[#E9E0F5]"
                       }`}
                   >
                     <input
